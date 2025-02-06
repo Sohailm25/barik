@@ -2,20 +2,8 @@ import AppKit
 import EventKit
 import SwiftUI
 
-struct MainView: View {
+struct MenuBarView: View {
     var body: some View {
-        VStack {
-            menuBar
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .font(.headline)
-        .background(.ultraThinMaterial)
-    }
-
-    // MARK: - Menu Bar
-
-    fileprivate var menuBar: some View {
         ZStack {
             HStack(spacing: 0) {
                 Spacer().frame(width: 25)
@@ -26,6 +14,7 @@ struct MainView: View {
             HStack(spacing: 0) {
                 Spacer()
                 HStack(spacing: 15) {
+                    SettingsWidget()
                     NetworkWidget()
                     BatteryWidget()
                 }
@@ -37,10 +26,10 @@ struct MainView: View {
                     .fill(Color.active)
                     .frame(width: 2, height: 15)
                     .clipShape(Capsule())
-
-                Spacer().frame(width: 15)
-                TimeWidget()
-                Spacer().frame(width: 25)
+                
+                    Spacer().frame(width: 15)
+                    TimeWidget()
+                    Spacer().frame(width: 25)
             }
             .foregroundStyle(Color.foregroundOutside)
         }
@@ -48,8 +37,8 @@ struct MainView: View {
     }
 }
 
-struct MenuBar_Previews: PreviewProvider {
+struct MenuBarView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView().menuBar.background(.black)
+        MenuBarView().background(.black)
     }
 }
