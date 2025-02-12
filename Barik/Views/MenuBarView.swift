@@ -1,44 +1,35 @@
 import AppKit
 import EventKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct MenuBarView: View {
+    @ObservedObject var manager: WidgetManager
     var body: some View {
         ZStack {
-            HStack(spacing: 0) {
-                Spacer().frame(width: 25)
-                SpaceIndicatorWidget()
+            HStack(spacing: 15) {
                 Spacer()
-            }
-
-            HStack(spacing: 0) {
-                Spacer()
-                HStack(spacing: 15) {
-                    SettingsWidget()
-                    NetworkWidget()
-                    BatteryWidget()
+                ForEach(manager.menuBarWidgets) { widget in
+                    DraggableWidget(widget: widget,
+                                    manager: manager,
+                                    container: .menuBar,
+                                    items: $manager.menuBarWidgets)
                 }
-                .shadow(color: .shadow, radius: 3)
-                .font(.system(size: 16))
-
-                Spacer().frame(width: 15)
-                Rectangle()
-                    .fill(Color.active)
-                    .frame(width: 2, height: 15)
-                    .clipShape(Capsule())
-                
-                    Spacer().frame(width: 15)
-                    TimeWidget()
-                    Spacer().frame(width: 25)
             }
-            .foregroundStyle(Color.foregroundOutside)
+            .onDrop(of: [UTType.plainText],
+                    delegate: ContainerDropDelegate(items: $manager.menuBarWidgets,
+                                                    container: .menuBar,
+                                                    manager: manager))
+            .shadow(color: .gray, radius: 3)
+            .font(.system(size: 16))
         }
-        .frame(height: 55)
+        .frame(height: Constants.menuBarHeight)
+        .contentShape(Rectangle())
     }
 }
 
-struct MenuBarView_Previews: PreviewProvider {
-    static var previews: some View {
-        MenuBarView().background(.black)
-    }
-}
+//struct MenuBarView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MenuBarView().background(.black)
+//    }
+//}

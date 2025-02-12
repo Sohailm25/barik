@@ -18,7 +18,6 @@ class BatteryManager: ObservableObject {
     }
 
     private func startMonitoring() {
-        // Update every 1 second.
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
             [weak self] _ in
             self?.updateBatteryStatus()

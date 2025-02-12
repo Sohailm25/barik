@@ -22,7 +22,6 @@ private struct SpaceView: View {
         HStack(spacing: 8) {
             Spacer().frame(width: 2)
             Text("\(space.id)")
-                .font(.headline)
                 .frame(minWidth: 15)
                 .fixedSize(horizontal: true, vertical: false)
             ForEach(space.windows) { window in
@@ -37,6 +36,7 @@ private struct SpaceView: View {
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .shadow(color: .shadow, radius: 2)
         .transition(.blurReplace)
+        .font(.headline)
     }
 }
 

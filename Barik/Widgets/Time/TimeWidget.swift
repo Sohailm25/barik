@@ -4,6 +4,8 @@ import SwiftUI
 struct TimeWidget: View {
     @State private var currentTime = Date()
     @StateObject private var calendarManager = CalendarManager()
+    
+    @State private var rect: CGRect = CGRect()
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common)
         .autoconnect()
@@ -18,9 +20,26 @@ struct TimeWidget: View {
                     .font(.subheadline)
             }
         }
+        .contentShape(Rectangle())
+        .background(
+            GeometryReader { geometry in
+                Color.clear
+                    .onAppear {
+                        rect = geometry.frame(in: .global)
+                    }
+                    .onChange(of: geometry.frame(in: .global)) { oldState, newState in
+                        rect = newState
+                    }
+            }
+        )
+        .font(.headline)
+        .foregroundStyle(.foregroundOutside)
         .shadow(color: .foregroundShadowOutside, radius: 3)
         .onReceive(timer) { date in
             currentTime = date
+        }
+        .onTapGesture {
+            MenuBarPopup.show(rect: rect, id: "calendar") { CalendarPopup() }
         }
     }
 

@@ -1,56 +1,49 @@
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var menuBarPanel: NSPanel?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupAndShowBackground()
         setupAndShowMenuBar()
+        MenuBarPopup.setup()
     }
-    
+
     private func setupAndShowBackground() {
         guard let screen = NSScreen.main?.visibleFrame else { return }
         let panelFrame = NSRect(
             x: 0, y: 0, width: screen.size.width, height: screen.size.height)
-        
         let panel = NSPanel(
             contentRect: panelFrame,
-            styleMask: [
-                .nonactivatingPanel,
-            ],
+            styleMask: [.nonactivatingPanel],
             backing: .buffered,
-            defer: false
-        )
-        
+            defer: false)
         panel.level = NSWindow.Level(
             rawValue: Int(CGWindowLevelForKey(.desktopWindow)))
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.collectionBehavior = [.canJoinAllSpaces]
         panel.contentView = NSHostingView(rootView: BackgroundView())
-        
         panel.orderFront(nil)
     }
-    
+
     private func setupAndShowMenuBar() {
         guard let screen = NSScreen.main?.visibleFrame else { return }
         let panelFrame = NSRect(
-            x: 0, y: 0, width: screen.size.width, height: screen.size.height)
-        
+            x: 0, y: screen.height - Constants.menuBarHeight, width: screen.size.width, height: Constants.menuBarHeight)
         let panel = NSPanel(
             contentRect: panelFrame,
-            styleMask: [
-                .nonactivatingPanel,
-            ],
+            styleMask: [.nonactivatingPanel],
             backing: .buffered,
-            defer: false
-        )
-        
+            defer: false)
         panel.level = NSWindow.Level(
             rawValue: Int(CGWindowLevelForKey(.backstopMenu)))
         panel.backgroundColor = .clear
+        panel.ignoresMouseEvents = false
         panel.hasShadow = false
         panel.collectionBehavior = [.canJoinAllSpaces]
-        panel.contentView = NSHostingView(rootView: MenuBarView())
-        
+        panel.contentView = NSHostingView(rootView: MenuBarView(manager: sharedWidgetManager))
         panel.orderFront(nil)
+        menuBarPanel = panel
     }
 }
