@@ -48,7 +48,28 @@ class SpacesViewModel: ObservableObject {
                 }
                 return
             }
-            let sortedSpaces = spaces.sorted { $0.id < $1.id }
+            let sortedSpaces = spaces.sorted { space1, space2 in
+                let id1 = space1.id
+                let id2 = space2.id
+
+                // Если оба id состоят только из цифр, сравниваем как числа
+                if let num1 = Int(id1), let num2 = Int(id2) {
+                    return num1 < num2
+                }
+
+                // Если только первый id - число, он идёт раньше
+                if Int(id1) != nil && Int(id2) == nil {
+                    return true
+                }
+
+                // Если только второй id - число, он идёт раньше
+                if Int(id1) == nil && Int(id2) != nil {
+                    return false
+                }
+
+                // Оба id содержат нечисловые символы, используем обычную строковую сортировку
+                return id1 < id2
+            }
             DispatchQueue.main.async {
                 self.spaces = sortedSpaces
             }

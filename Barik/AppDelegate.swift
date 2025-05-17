@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             showFatalConfigError(message: error)
             return
         }
-        
+
         // Show "What's New" banner if the app version is outdated
         if !VersionChecker.isLatestVersion() {
             VersionChecker.updateVersionFile()
@@ -18,67 +18,62 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     name: Notification.Name("ShowWhatsNewBanner"), object: nil)
             }
         }
-        
+
         MenuBarPopup.setup()
-        setupPanels()
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(screenParametersDidChange(_:)),
-            name: NSApplication.didChangeScreenParametersNotification,
-            object: nil)
-    }
-
-    @objc private func screenParametersDidChange(_ notification: Notification) {
         setupPanels()
     }
 
     /// Configures and displays the background and menu bar panels.
     private func setupPanels() {
-        guard let screenFrame = NSScreen.main?.frame else { return }
-        setupPanel(
-            &backgroundPanel,
+        // Clear existing panels
+        backgroundPanel?.close()
+        menuBarPanel?.close()
+        backgroundPanel = nil
+        menuBarPanel = nil
+
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let screenFrame = screen.frame
+
+        // Create background panel
+        backgroundPanel = createPanel(
             frame: screenFrame,
             level: Int(CGWindowLevelForKey(.desktopWindow)),
             hostingRootView: AnyView(BackgroundView()))
-        setupPanel(
-            &menuBarPanel,
+
+        // Create menu bar panel
+        menuBarPanel = createPanel(
             frame: screenFrame,
             level: Int(CGWindowLevelForKey(.backstopMenu)),
             hostingRootView: AnyView(MenuBarView()))
     }
 
-    /// Sets up an NSPanel with the provided parameters.
-    private func setupPanel(
-        _ panel: inout NSPanel?, frame: CGRect, level: Int,
+    /// Creates an NSPanel with the provided parameters.
+    private func createPanel(
+        frame: CGRect, level: Int,
         hostingRootView: AnyView
-    ) {
-        if let existingPanel = panel {
-            existingPanel.setFrame(frame, display: true)
-            return
-        }
-
-        let newPanel = NSPanel(
+    ) -> NSPanel {
+        let panel = NSPanel(
             contentRect: frame,
             styleMask: [.nonactivatingPanel],
             backing: .buffered,
             defer: false)
-        newPanel.level = NSWindow.Level(rawValue: level)
-        newPanel.backgroundColor = .clear
-        newPanel.hasShadow = false
-        newPanel.collectionBehavior = [.canJoinAllSpaces]
-        newPanel.contentView = NSHostingView(rootView: hostingRootView)
-        newPanel.orderFront(nil)
-        panel = newPanel
+        panel.level = NSWindow.Level(rawValue: level)
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.collectionBehavior = [.canJoinAllSpaces]
+        panel.contentView = NSHostingView(rootView: hostingRootView)
+        panel.orderFront(nil)
+        return panel
     }
-    
+
     private func showFatalConfigError(message: String) {
         let alert = NSAlert()
         alert.messageText = "Configuration Error"
-        alert.informativeText = "\(message)\n\nPlease double check ~/.barik-config.toml and try again."
+        alert.informativeText =
+            "\(message)\n\nPlease double check ~/.barik-config.toml and try again."
         alert.alertStyle = .critical
         alert.addButton(withTitle: "Quit")
-        
+
         alert.runModal()
         NSApplication.shared.terminate(nil)
     }

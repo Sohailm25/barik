@@ -5,19 +5,23 @@ struct MenuBarPopupView<Content: View>: View {
     let isPreview: Bool
 
     @ObservedObject var configManager = ConfigManager.shared
-    var foregroundHeight: CGFloat { configManager.config.experimental.foreground.resolveHeight() }
+    var foregroundHeight: CGFloat {
+        configManager.config.experimental.foreground.resolveHeight()
+    }
 
     @State private var contentHeight: CGFloat = 0
     @State private var viewFrame: CGRect = .zero
     @State private var animationValue: Double = 0.01
-    private var animated: Bool { isShowAnimation || isHideAnimation }
     @State private var isShowAnimation = false
     @State private var isHideAnimation = false
+    @State private var isResizeAnimation = false
 
     private let willShowWindow = NotificationCenter.default.publisher(
         for: .willShowWindow)
     private let willHideWindow = NotificationCenter.default.publisher(
         for: .willHideWindow)
+    private let willResizeWindow = NotificationCenter.default.publisher(
+        for: .willResizeWindow)
     private let willChangeContent = NotificationCenter.default.publisher(
         for: .willChangeContent)
 
@@ -46,6 +50,7 @@ struct MenuBarPopupView<Content: View>: View {
                     }
                 }
                 .onReceive(willShowWindow) { _ in
+                    guard !isShowAnimation else { return }
                     isShowAnimation = true
                     withAnimation(
                         .smooth(
@@ -61,12 +66,13 @@ struct MenuBarPopupView<Content: View>: View {
                             + .milliseconds(
                                 Constants
                                     .menuBarPopupAnimationDurationInMilliseconds
-                            )
+                            ) + 0.1
                     ) {
                         isShowAnimation = false
                     }
                 }
                 .onReceive(willHideWindow) { _ in
+                    guard !isHideAnimation else { return }
                     isHideAnimation = true
                     withAnimation(
                         .interactiveSpring(
@@ -88,6 +94,8 @@ struct MenuBarPopupView<Content: View>: View {
                     }
                 }
                 .onReceive(willChangeContent) { _ in
+                    guard !isHideAnimation else { return }
+                    
                     isHideAnimation = true
                     withAnimation(
                         .spring(
@@ -108,13 +116,23 @@ struct MenuBarPopupView<Content: View>: View {
                         isHideAnimation = false
                     }
                 }
-                .animation(
-                    .smooth(duration: 0.3), value: animated ? 0 : computedOffset
-                )
-                .animation(
-                    .smooth(duration: 0.3),
-                    value: animated ? 0 : computedYOffset
-                )
+                .onReceive(willResizeWindow) { _ in
+                    guard !isResizeAnimation else { return }
+                    isResizeAnimation = true
+                    
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now() + 0.5
+                    ) {
+                        isResizeAnimation = false
+                    }
+                }
+                        .animation(
+                            .smooth(duration: 0.3),
+                            value: isResizeAnimation ? computedOffset : 0
+                        )
+                        .animation(
+                            .smooth(duration: 0.3),
+                            value: isResizeAnimation ? computedYOffset : 0)
         }
         .background(
             GeometryReader { geometry in
@@ -133,6 +151,7 @@ struct MenuBarPopupView<Content: View>: View {
         )
         .foregroundStyle(.white)
         .preferredColorScheme(.dark)
+        .buttonStyle(DefaultButtonStyle())
     }
 
     var computedOffset: CGFloat {
@@ -158,5 +177,6 @@ struct MenuBarPopupView<Content: View>: View {
 extension Notification.Name {
     static let willShowWindow = Notification.Name("willShowWindow")
     static let willHideWindow = Notification.Name("willHideWindow")
+    static let willResizeWindow = Notification.Name("willResizeWindow")
     static let willChangeContent = Notification.Name("willChangeContent")
 }

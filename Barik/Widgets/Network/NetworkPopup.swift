@@ -28,16 +28,6 @@ struct NetworkPopup: View {
                     .font(.subheadline)
                 }
             }
-
-            // Ethernet section
-            if viewModel.ethernetState != .notSupported {
-                HStack(spacing: 8) {
-                    ethernetIcon
-                    Text("Ethernet: \(viewModel.ethernetState.rawValue)")
-                        .foregroundColor(.white)
-                        .font(.headline)
-                }
-            }
         }
         .padding(25)
         .background(Color.black)
@@ -89,41 +79,6 @@ struct NetworkPopup: View {
                 .background(Color.gray.opacity(0.8))
                 .clipShape(Circle())
                 .foregroundStyle(.white)
-        }
-    }
-
-    private var ethernetIcon: some View {
-        switch viewModel.ethernetState {
-        case .connected:
-            return Image(systemName: "network")
-                .padding(8)
-                .background(Color.blue.opacity(0.8))
-                .clipShape(Circle())
-        case .connectedWithoutInternet:
-            return Image(systemName: "network")
-                .padding(8)
-                .background(Color.yellow.opacity(0.8))
-                .clipShape(Circle())
-        case .connecting:
-            return Image(systemName: "network.slash")
-                .padding(8)
-                .background(Color.yellow.opacity(0.8))
-                .clipShape(Circle())
-        case .disconnected:
-            return Image(systemName: "network.slash")
-                .padding(8)
-                .background(Color.gray.opacity(0.8))
-                .clipShape(Circle())
-        case .disabled:
-            return Image(systemName: "network.slash")
-                .padding(8)
-                .background(Color.red.opacity(0.8))
-                .clipShape(Circle())
-        case .notSupported:
-            return Image(systemName: "questionmark.circle")
-                .padding(8)
-                .background(Color.gray.opacity(0.8))
-                .clipShape(Circle())
         }
     }
 }

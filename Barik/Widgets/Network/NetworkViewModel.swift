@@ -24,9 +24,8 @@ final class NetworkStatusViewModel: NSObject, ObservableObject,
     CLLocationManagerDelegate
 {
 
-    // States for Wi‑Fi and Ethernet obtained via NWPathMonitor.
+    // States for Wi‑Fi obtained via NWPathMonitor.
     @Published var wifiState: NetworkState = .disconnected
-    @Published var ethernetState: NetworkState = .disconnected
 
     // Wi‑Fi details obtained via CoreWLAN.
     @Published var ssid: String = "Not connected"
@@ -92,26 +91,6 @@ final class NetworkStatusViewModel: NSObject, ObservableObject,
                     }
                 } else {
                     self.wifiState = .notSupported
-                }
-
-                // Ethernet
-                if path.availableInterfaces.contains(where: {
-                    $0.type == .wiredEthernet
-                }) {
-                    if path.usesInterfaceType(.wiredEthernet) {
-                        switch path.status {
-                        case .satisfied:
-                            self.ethernetState = .connected
-                        case .requiresConnection:
-                            self.ethernetState = .connecting
-                        default:
-                            self.ethernetState = .disconnected
-                        }
-                    } else {
-                        self.ethernetState = .disconnected
-                    }
-                } else {
-                    self.ethernetState = .notSupported
                 }
             }
         }

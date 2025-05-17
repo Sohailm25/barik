@@ -5,8 +5,8 @@ struct BarikApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Settings {
-            EmptyView()
-        }
+        MenuBarExtra("Barik", image: "MenuBar") {
+                   Button("Quit Barik") { NSApplication.shared.terminate(nil) }
+               }
     }
 }

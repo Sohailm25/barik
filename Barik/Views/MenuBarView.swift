@@ -34,6 +34,7 @@ struct MenuBarView: View {
         .padding(.horizontal, configManager.config.experimental.foreground.horizontalPadding)
         .background(.black.opacity(0.001))
         .preferredColorScheme(theme)
+        .buttonStyle(DefaultButtonStyle())
     }
 
     @ViewBuilder
@@ -45,6 +46,16 @@ struct MenuBarView: View {
         case "default.spaces":
             SpacesWidget().environmentObject(config)
 
+        case "default.nowplaying":
+            NowPlayingWidget()
+                .environmentObject(config)
+
+        case "default.keyboardlayout":
+            KeyboardLayoutWidget().environmentObject(config)
+
+        case "default.bluetooth":
+            BluetoothWidget().environmentObject(config)
+
         case "default.network":
             NetworkWidget().environmentObject(config)
 
@@ -54,19 +65,15 @@ struct MenuBarView: View {
         case "default.time":
             TimeWidget(calendarManager: CalendarManager(configProvider: config))
                 .environmentObject(config)
-            
-        case "default.nowplaying":
-            NowPlayingWidget()
-                .environmentObject(config)
-
         case "spacer":
             Spacer().frame(minWidth: 50, maxWidth: .infinity)
 
         case "divider":
             Rectangle()
-                .fill(Color.active)
+                .fill(.icon)
                 .frame(width: 2, height: 15)
                 .clipShape(Capsule())
+                .padding(.horizontal, 5)
 
         case "system-banner":
             SystemBannerWidget()

@@ -1,5 +1,7 @@
 import SwiftUI
 
+private let popupId = "nowplaying"
+
 // MARK: - Now Playing Widget
 
 struct NowPlayingWidget: View {
@@ -10,40 +12,44 @@ struct NowPlayingWidget: View {
     @State private var animatedWidth: CGFloat = 0
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            if let song = playingManager.nowPlaying {
-                // Hidden view for measuring the intrinsic width.
-                MeasurableNowPlayingContent(song: song) { measuredWidth in
-                    if animatedWidth == 0 {
-                        animatedWidth = measuredWidth
-                    } else if animatedWidth != measuredWidth {
-                        withAnimation(.smooth) {
+        Button(action: {
+            MenuBarPopup.show(rect: widgetFrame, id: popupId) {
+                NowPlayingPopup(configProvider: configProvider)
+            }
+        }) {
+            ZStack(alignment: .trailing) {
+                if let song = playingManager.nowPlaying {
+                    // Hidden view for measuring the intrinsic width.
+                    MeasurableNowPlayingContent(song: song) { measuredWidth in
+                        if animatedWidth == 0 {
                             animatedWidth = measuredWidth
+                        } else if animatedWidth != measuredWidth {
+                            withAnimation(.smooth) {
+                                animatedWidth = measuredWidth
+                            }
                         }
                     }
-                }
-                .hidden()
+                    .hidden()
 
-                // Visible content with fixed animated width.
-                VisibleNowPlayingContent(song: song, width: animatedWidth)
-                    .onTapGesture {
-                        MenuBarPopup.show(rect: widgetFrame, id: "nowplaying") {
-                            NowPlayingPopup(configProvider: configProvider)
+                    // Visible content with fixed animated width.
+                    VisibleNowPlayingContent(song: song, width: animatedWidth)
+                } else {
+                    OutputAudioWidget(showBackground: false)
+                }
+            }
+            .background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .onAppear {
+                            widgetFrame = geometry.frame(in: .global)
                         }
-                    }
-            }
-        }
-        .background(
-            GeometryReader { geometry in
-                Color.clear
-                    .onAppear {
-                        widgetFrame = geometry.frame(in: .global)
-                    }
-                    .onChange(of: geometry.frame(in: .global)) { _, newFrame in
-                        widgetFrame = newFrame
-                    }
-            }
-        )
+                        .onChange(of: geometry.frame(in: .global)) { _, newFrame in
+                            widgetFrame = newFrame
+                        }
+                }
+            )
+        }.buttonStyle(
+            TransparentButtonStyle(withPadding: playingManager.nowPlaying != nil ? true : false))
     }
 }
 
@@ -54,20 +60,24 @@ struct NowPlayingContent: View {
     let song: NowPlayingSong
     @ObservedObject var configManager = ConfigManager.shared
     var foregroundHeight: CGFloat { configManager.config.experimental.foreground.resolveHeight() }
-    
+
+    @State var isHovered: Bool = false
+
     var body: some View {
-        Group {
+        VStack {
             if foregroundHeight < 38 {
                 HStack(spacing: 8) {
-                    AlbumArtView(song: song)
+                    AlbumArtView(song: song, isHovered: isHovered)
                     SongTextView(song: song)
+                    OutputAudioWidget()
                 }
             } else {
                 HStack(spacing: 8) {
-                    AlbumArtView(song: song)
+                    AlbumArtView(song: song, isHovered: isHovered)
                     SongTextView(song: song)
+                    OutputAudioWidget()
                 }
-                .padding(.horizontal, foregroundHeight < 45 ? 8 : 12)
+                .padding(.horizontal, foregroundHeight < 45 ? 6 : 8)
                 .frame(height: foregroundHeight < 45 ? 30 : 38)
                 .background(configManager.config.experimental.foreground.widgetsBackground.blur)
                 .clipShape(Capsule())
@@ -77,6 +87,7 @@ struct NowPlayingContent: View {
             }
         }
         .foregroundColor(.foreground)
+        .onHover { isHovered = $0 }
     }
 }
 
@@ -123,25 +134,75 @@ struct VisibleNowPlayingContent: View {
 /// A view that displays the album art with a fade animation and a pause indicator if needed.
 struct AlbumArtView: View {
     let song: NowPlayingSong
+    let isHovered: Bool
 
     var body: some View {
-        ZStack {
-            FadeAnimatedCachedImage(
-                url: song.albumArtURL,
-                targetSize: CGSize(width: 20, height: 20)
-            )
-            .frame(width: 20, height: 20)
-            .clipShape(RoundedRectangle(cornerRadius: 4))
-            .scaleEffect(song.state == .paused ? 0.9 : 1)
-            .brightness(song.state == .paused ? -0.3 : 0)
+        Button(action: {
+            NowPlayingManager.shared.togglePlayPause()
+        }) {
+            ZStack {
+                FadeAnimatedCachedImage(
+                    url: song.albumArtURL,
+                    targetSize: CGSize(width: 20, height: 20),
+                    fitHeight: true
+                )
+                .frame(width: 20, height: 20)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .scaleEffect(song.state == .paused ? 0.9 : 1)
+                .brightness(song.state == .paused || isHovered ? -0.3 : 0)
 
-            if song.state == .paused {
-                Image(systemName: "pause.fill")
-                    .foregroundColor(.icon)
-                    .transition(.blurReplace)
+                if song.state == .paused {
+                    Image(systemName: "pause.fill")
+                        .foregroundStyle(.white)
+                        .transition(.blurReplace)
+                } else if isHovered {
+                    PlayingStatus()
+                }
             }
+            .animation(.smooth(duration: 0.1), value: isHovered || song.state == .paused)
+        }.buttonStyle(DefaultButtonStyle(withPadding: false, hoverStyle: .square))
+    }
+}
+
+struct PlayingStatus: View {
+    @State var musicAnimationValues = (0.0, 0.0, 0.0, 0.0, 0.0)
+
+    var body: some View {
+        HStack(spacing: 1) {
+            Capsule()
+                .fill(.white)
+                .frame(width: 2, height: 13 * musicAnimationValues.0)
+            Capsule()
+                .fill(.white)
+                .frame(width: 2, height: 13 * musicAnimationValues.1)
+            Capsule()
+                .fill(.white)
+                .frame(width: 2, height: 13 * musicAnimationValues.2)
+            Capsule()
+                .fill(.white)
+                .frame(width: 2, height: 13 * musicAnimationValues.3)
+            Capsule()
+                .fill(.white)
+                .frame(width: 2, height: 13 * musicAnimationValues.4)
         }
-        .animation(.smooth(duration: 0.1), value: song.state == .paused)
+        .onAppear {
+            animation()
+        }
+        .onReceive(Timer.publish(every: 0.2, on: .main, in: .common).autoconnect()) { _ in
+            animation()
+        }
+    }
+
+    func animation() {
+        withAnimation(.linear(duration: 0.2)) {
+            musicAnimationValues = (
+                Double.random(in: 0.2...0.5),
+                Double.random(in: 0.2...0.8),
+                Double.random(in: 0.2...1),
+                Double.random(in: 0.2...0.8),
+                Double.random(in: 0.2...0.5)
+            )
+        }
     }
 }
 

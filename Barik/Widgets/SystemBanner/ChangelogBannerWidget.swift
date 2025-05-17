@@ -1,5 +1,7 @@
 import SwiftUI
 
+private let popupId = "changelog"
+
 struct ChangelogBannerWidget: View {
     @State private var rect: CGRect = .zero
 

@@ -7,6 +7,9 @@
     "%lld" : {
       "shouldTranslate" : false
     },
+    "%lld%%" : {
+
+    },
     "ALL_DAY" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -132,6 +135,9 @@
         }
       }
     },
+    "Barik" : {
+
+    },
     "Channel: %@" : {
       "localizations" : {
         "ar" : {
@@ -255,6 +261,9 @@
           }
         }
       }
+    },
+    "Connected" : {
+
     },
     "EMPTY_EVENTS" : {
       "extractionState" : "manual",
@@ -382,6 +391,7 @@
       }
     },
     "Ethernet: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -504,6 +514,9 @@
           }
         }
       }
+    },
+    "MacBook Air" : {
+
     },
     "Noise: %lld" : {
       "localizations" : {
@@ -628,6 +641,9 @@
           }
         }
       }
+    },
+    "Quit Barik" : {
+
     },
     "RSSI: %lld" : {
       "localizations" : {
@@ -1622,6 +1638,12 @@
           }
         }
       }
+    },
+    "Аудиоустройства не найдены" : {
+
+    },
+    "Устройства не найдены" : {
+
     }
   },
   "version" : "1.0"

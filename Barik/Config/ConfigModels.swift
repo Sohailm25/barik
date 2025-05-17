@@ -26,15 +26,15 @@ struct Config {
     var theme: String {
         rootToml.theme ?? "light"
     }
-    
+
     var yabai: YabaiConfig {
         rootToml.yabai ?? YabaiConfig()
     }
-    
+
     var aerospace: AerospaceConfig {
         rootToml.aerospace ?? AerospaceConfig()
     }
-    
+
     var experimental: ExperimentalConfig {
         rootToml.experimental ?? ExperimentalConfig()
     }
@@ -224,7 +224,8 @@ struct YabaiConfig: Decodable {
     init() {
         if FileManager.default.fileExists(atPath: "/opt/homebrew/bin/yabai") {
             self.path = "/opt/homebrew/bin/yabai"
-        } else if FileManager.default.fileExists(atPath: "/usr/local/bin/yabai") {
+        } else if FileManager.default.fileExists(atPath: "/usr/local/bin/yabai")
+        {
             self.path = "/usr/local/bin/yabai"
         } else {
             self.path = "/opt/homebrew/bin/yabai"
@@ -236,9 +237,12 @@ struct AerospaceConfig: Decodable {
     let path: String
 
     init() {
-        if FileManager.default.fileExists(atPath: "/opt/homebrew/bin/aerospace") {
+        if FileManager.default.fileExists(atPath: "/opt/homebrew/bin/aerospace")
+        {
             self.path = "/opt/homebrew/bin/aerospace"
-        } else if FileManager.default.fileExists(atPath: "/usr/local/bin/aerospace") {
+        } else if FileManager.default.fileExists(
+            atPath: "/usr/local/bin/aerospace")
+        {
             self.path = "/usr/local/bin/aerospace"
         } else {
             self.path = "/opt/homebrew/bin/aerospace"
@@ -249,20 +253,32 @@ struct AerospaceConfig: Decodable {
 struct ExperimentalConfig: Decodable {
     let foreground: ForegroundConfig
     let background: BackgroundConfig
-    
+    let appMenu: AppMenuConfig
+
     enum CodingKeys: String, CodingKey {
         case foreground, background
+        case appMenu = "app-menu"
     }
-    
+
     init() {
         self.foreground = ForegroundConfig()
         self.background = BackgroundConfig()
+        self.appMenu = AppMenuConfig()
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        foreground = try container.decodeIfPresent(ForegroundConfig.self, forKey: .foreground) ?? ForegroundConfig()
-        background = try container.decodeIfPresent(BackgroundConfig.self, forKey: .background) ?? BackgroundConfig()
+        foreground =
+            try container.decodeIfPresent(
+                ForegroundConfig.self, forKey: .foreground)
+            ?? ForegroundConfig()
+        background =
+            try container.decodeIfPresent(
+                BackgroundConfig.self, forKey: .background)
+            ?? BackgroundConfig()
+        appMenu =
+            try container.decodeIfPresent(AppMenuConfig.self, forKey: .appMenu)
+            ?? AppMenuConfig()
     }
 }
 
@@ -271,35 +287,47 @@ struct ForegroundConfig: Decodable {
     let horizontalPadding: CGFloat
     let widgetsBackground: WidgetBackgroundConfig
     let spacing: CGFloat
-    
+
     init() {
         self.height = .barikDefault
         self.horizontalPadding = Constants.menuBarHorizontalPadding
         self.widgetsBackground = WidgetBackgroundConfig()
-        self.spacing = 15
+        self.spacing = 5
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        height = try container.decodeIfPresent(BackgroundForegroundHeight.self, forKey: .height) ?? .barikDefault
-        horizontalPadding = try container.decodeIfPresent(CGFloat.self, forKey: .horizontalPadding) ?? Constants.menuBarHorizontalPadding
-        widgetsBackground = try container.decodeIfPresent(WidgetBackgroundConfig.self, forKey: .widgetsBackground) ?? WidgetBackgroundConfig()
-        spacing = try container.decodeIfPresent(CGFloat.self, forKey: .spacing) ?? 15
+        height =
+            try container.decodeIfPresent(
+                BackgroundForegroundHeight.self, forKey: .height)
+            ?? .barikDefault
+        horizontalPadding =
+            try container.decodeIfPresent(
+                CGFloat.self, forKey: .horizontalPadding)
+            ?? Constants.menuBarHorizontalPadding
+        widgetsBackground =
+            try container.decodeIfPresent(
+                WidgetBackgroundConfig.self, forKey: .widgetsBackground)
+            ?? WidgetBackgroundConfig()
+        spacing =
+            try container.decodeIfPresent(CGFloat.self, forKey: .spacing) ?? 15
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case height
         case horizontalPadding = "horizontal-padding"
         case widgetsBackground = "widgets-background"
         case spacing
     }
-    
+
     func resolveHeight() -> CGFloat {
         switch height {
         case .barikDefault:
             return CGFloat(Constants.menuBarHeight)
         case .menuBar:
-            return NSApplication.shared.mainMenu.map({ CGFloat($0.menuBarHeight) }) ?? 0
+            return NSApplication.shared.mainMenu.map({
+                CGFloat($0.menuBarHeight)
+            }) ?? 0
         case .float(let value):
             return CGFloat(value)
         }
@@ -309,25 +337,30 @@ struct ForegroundConfig: Decodable {
 struct WidgetBackgroundConfig: Decodable {
     let displayed: Bool
     let blur: Material
-    
+
     init() {
         self.displayed = false
         self.blur = .regular
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        displayed = try container.decodeIfPresent(Bool.self, forKey: .displayed) ?? false
-        
-        var materialIndex = try container.decodeIfPresent(Int.self, forKey: .blur) ?? 1
+
+        displayed =
+            try container.decodeIfPresent(Bool.self, forKey: .displayed)
+            ?? false
+
+        var materialIndex =
+            try container.decodeIfPresent(Int.self, forKey: .blur) ?? 1
         if materialIndex < 1 {
             materialIndex = 1
         } else if materialIndex > 6 {
             materialIndex = 6
         }
-        
-        blur = [.ultraThin, .thin, .regular, .thick, .ultraThick, .bar][materialIndex - 1]
+
+        blur =
+            [.ultraThin, .thin, .regular, .thick, .ultraThick, .bar][
+                materialIndex - 1]
     }
 
     enum CodingKeys: String, CodingKey {
@@ -347,20 +380,27 @@ struct BackgroundConfig: Decodable {
         self.blur = .regular
         self.black = false
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        displayed = try container.decodeIfPresent(Bool.self, forKey: .displayed) ?? true
-        height = try container.decodeIfPresent(BackgroundForegroundHeight.self, forKey: .height) ?? .barikDefault
-        
-        var materialIndex = try container.decodeIfPresent(Int.self, forKey: .blur) ?? 1
+        displayed =
+            try container.decodeIfPresent(Bool.self, forKey: .displayed) ?? true
+        height =
+            try container.decodeIfPresent(
+                BackgroundForegroundHeight.self, forKey: .height)
+            ?? .barikDefault
+
+        var materialIndex =
+            try container.decodeIfPresent(Int.self, forKey: .blur) ?? 1
         if materialIndex < 1 {
             materialIndex = 1
         } else if materialIndex > 7 {
             materialIndex = 7
         }
-        
-        blur = [.ultraThin, .thin, .regular, .thick, .ultraThick, .bar, .bar][materialIndex - 1]
+
+        blur =
+            [.ultraThin, .thin, .regular, .thick, .ultraThick, .bar, .bar][
+                materialIndex - 1]
         self.black = materialIndex == 7
     }
 
@@ -373,7 +413,9 @@ struct BackgroundConfig: Decodable {
         case .barikDefault:
             return nil
         case .menuBar:
-            return NSApplication.shared.mainMenu.map({ CGFloat($0.menuBarHeight) }) ?? 0
+            return NSApplication.shared.mainMenu.map({
+                CGFloat($0.menuBarHeight)
+            }) ?? 0
         case .float(let value):
             return CGFloat(value)
         }
@@ -382,18 +424,20 @@ struct BackgroundConfig: Decodable {
 
 enum ForegroundPadding: Decodable {
     case float(Float)
-    
+
     init(from decoder: Decoder) throws {
-        if let floatValue = try? decoder.singleValueContainer().decode(Float.self) {
+        if let floatValue = try? decoder.singleValueContainer().decode(
+            Float.self)
+        {
             self = .float(floatValue)
             return
         }
-        
+
         if let intValue = try? decoder.singleValueContainer().decode(Int.self) {
             self = .float(Float(intValue))
             return
         }
-        
+
         throw DecodingError.typeMismatch(
             ForegroundPadding.self,
             DecodingError.Context(
@@ -408,42 +452,156 @@ enum BackgroundForegroundHeight: Decodable {
     case barikDefault
     case menuBar
     case float(Float)
-    
+
     init(from decoder: Decoder) throws {
-        if let floatValue = try? decoder.singleValueContainer().decode(Float.self) {
+        if let floatValue = try? decoder.singleValueContainer().decode(
+            Float.self)
+        {
             self = .float(floatValue)
             return
         }
-        
+
         if let intValue = try? decoder.singleValueContainer().decode(Int.self) {
             self = .float(Float(intValue))
             return
         }
-        
-        if let stringValue = try? decoder.singleValueContainer().decode(String.self) {
+
+        if let stringValue = try? decoder.singleValueContainer().decode(
+            String.self)
+        {
             if stringValue == "default" {
                 self = .barikDefault
                 return
             }
-            
+
             if stringValue == "menu-bar" {
                 self = .menuBar
                 return
             }
-            
+
             throw DecodingError.dataCorruptedError(
                 in: try decoder.singleValueContainer(),
-                debugDescription: "Expected 'default', 'menu-bar' or a float value, but found \(stringValue)"
+                debugDescription:
+                    "Expected 'default', 'menu-bar' or a float value, but found \(stringValue)"
             )
         }
-        
+
         throw DecodingError.typeMismatch(
-            ForegroundPadding.self,
+            BackgroundForegroundHeight.self,
             DecodingError.Context(
                 codingPath: decoder.codingPath,
-                debugDescription: "Expected 'default', 'menu-bar' or a float value"
+                debugDescription:
+                    "Expected 'default', 'menu-bar' or a float value"
             )
         )
     }
 }
 
+struct AppMenuConfig: Decodable {
+    let enabled: Bool
+    let navigatorKey: KeyShortcut
+    let animation: AppMenuAnimation
+
+    init() {
+        self.enabled = false
+        self.navigatorKey = KeyShortcut(modifiers: .option)
+        self.animation = AppMenuAnimation.barikDefault
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enabled =
+            try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? false
+        let navigatorKeyString = try container.decodeIfPresent(
+            String.self, forKey: .navigatorKey)
+
+        if let navigatorKeyString = navigatorKeyString,
+            let keyShortcut = parseShortcut(navigatorKeyString)
+        {
+            navigatorKey = keyShortcut
+        } else {
+            navigatorKey = KeyShortcut(modifiers: .option)
+        }
+        
+        animation = try container.decodeIfPresent(AppMenuAnimation.self, forKey: .animation) ?? AppMenuAnimation.barikDefault
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case navigatorKey = "navigator-key"
+        case animation
+    }
+}
+
+struct KeyShortcut {
+    let modifiers: NSEvent.ModifierFlags
+}
+
+func parseShortcut(_ shortcut: String) -> KeyShortcut? {
+    let parts =
+        shortcut
+        .lowercased()
+        .split(separator: "+")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+
+    var modifiers = NSEvent.ModifierFlags()
+
+    for part in parts {
+        switch part {
+        case "cmd", "command":
+            modifiers.insert(.command)
+        case "shift":
+            modifiers.insert(.shift)
+        case "opt", "option", "alt":
+            modifiers.insert(.option)
+        case "ctrl", "control":
+            modifiers.insert(.control)
+        case "fn", "function":
+            modifiers.insert(.function)
+        case "caps", "capslock", "caps-lock", "capsLock":
+            modifiers.insert(.capsLock)
+        case "help":
+            modifiers.insert(.help)
+        default:
+            continue;
+        }
+    }
+
+    return KeyShortcut(modifiers: modifiers)
+}
+
+enum AppMenuAnimation: Decodable {
+    case barikDefault
+    case advanced
+
+    init(from decoder: Decoder) throws {
+        if let stringValue = try? decoder.singleValueContainer().decode(
+            String.self)
+        {
+            if stringValue == "default" {
+                self = .barikDefault
+                return
+            }
+
+            if stringValue == "advanced" {
+                self = .advanced
+                return
+            }
+
+            throw DecodingError.dataCorruptedError(
+                in: try decoder.singleValueContainer(),
+                debugDescription:
+                    "Expected 'default' or 'advanced', but found \(stringValue)"
+            )
+        }
+
+        throw DecodingError.typeMismatch(
+            AppMenuAnimation.self,
+            DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription:
+                    "Expected 'default' or 'advanced'"
+            )
+        )
+    }
+}

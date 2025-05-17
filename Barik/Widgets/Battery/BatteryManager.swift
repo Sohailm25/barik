@@ -4,6 +4,8 @@ import IOKit.ps
 
 /// This class monitors the battery status.
 class BatteryManager: ObservableObject {
+    static let shared = BatteryManager()
+    
     @Published var batteryLevel: Int = 0
     @Published var isCharging: Bool = false
     @Published var isPluggedIn: Bool = false

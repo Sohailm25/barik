@@ -1,6 +1,8 @@
 import EventKit
 import SwiftUI
 
+private let popupId = "calendar"
+
 struct TimeWidget: View {
     @EnvironmentObject var configProvider: ConfigProvider
     var config: ConfigData { configProvider.config }
@@ -25,43 +27,41 @@ struct TimeWidget: View {
         .autoconnect()
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 0) {
-            Text(formattedTime(pattern: format, from: currentTime))
-                .fontWeight(.semibold)
-            if let event = calendarManager.nextEvent, calendarShowEvents {
-                Text(eventText(for: event))
-                    .opacity(0.8)
-                    .font(.subheadline)
-            }
-        }
-        .font(.headline)
-        .foregroundStyle(.foregroundOutside)
-        .shadow(color: .foregroundShadowOutside, radius: 3)
-        .onReceive(timer) { date in
-            currentTime = date
-        }
-        .background(
-            GeometryReader { geometry in
-                Color.clear
-                    .onAppear {
-                        rect = geometry.frame(in: .global)
-                    }
-                    .onChange(of: geometry.frame(in: .global)) {
-                        oldState, newState in
-                        rect = newState
-                    }
-            }
-        )
-        .experimentalConfiguration(cornerRadius: 15)
-        .frame(maxHeight: .infinity)
-        .background(.black.opacity(0.001))
-        .monospacedDigit()
-        .onTapGesture {
-            MenuBarPopup.show(rect: rect, id: "calendar") {
+        Button(action: {
+            MenuBarPopup.show(rect: rect, id: popupId) {
                 CalendarPopup(
                     calendarManager: calendarManager,
                     configProvider: configProvider)
             }
+        } ) {
+            VStack(alignment: .trailing, spacing: 0) {
+                Text(formattedTime(pattern: format, from: currentTime))
+                    .fontWeight(.semibold)
+                if let event = calendarManager.nextEvent, calendarShowEvents {
+                    Text(eventText(for: event))
+                        .opacity(0.8)
+                        .font(.subheadline)
+                }
+            }
+            .font(.headline)
+            .foregroundStyle(.foregroundOutside)
+            .shadow(color: .foregroundShadowOutside, radius: 3)
+            .onReceive(timer) { date in
+                currentTime = date
+            }
+            .background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .onAppear {
+                            rect = geometry.frame(in: .global)
+                        }
+                        .onChange(of: geometry.frame(in: .global)) {
+                            oldState, newState in
+                            rect = newState
+                        }
+                }
+            )
+            .monospacedDigit()
         }
     }
 

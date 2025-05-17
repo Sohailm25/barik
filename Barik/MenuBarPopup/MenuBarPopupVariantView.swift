@@ -98,19 +98,25 @@ struct MenuBarPopupVariantView: View {
         variant: MenuBarPopupVariant, systemImageName: String
     ) -> some View {
         Button {
-            if selectedVariant != variant {
-                withAnimation(.smooth(duration: 0.3)) {
-                    animationValue = 1
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .willResizeWindow, object: nil)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                if selectedVariant != variant {
                     withAnimation(.smooth(duration: 0.3)) {
-                        onVariantSelected?(variant)
+                        animationValue = 1
                     }
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    withAnimation(.smooth(duration: 0.3)) {
-                        animationValue = 0
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.smooth(duration: 0.3)) {
+                            onVariantSelected?(variant)
+                        }
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation(.smooth(duration: 0.3)) {
+                            animationValue = 0
+                        }
                     }
                 }
             }

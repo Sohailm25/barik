@@ -1,64 +1,73 @@
 import SwiftUI
 
+private let popupId = "battery"
+
 struct BatteryWidget: View {
     @EnvironmentObject var configProvider: ConfigProvider
     var config: ConfigData { configProvider.config }
     var showPercentage: Bool { config["show-percentage"]?.boolValue ?? true }
     var warningLevel: Int { config["warning-level"]?.intValue ?? 20 }
     var criticalLevel: Int { config["critical-level"]?.intValue ?? 10 }
+    var hideWhenFull: Bool { config["hide-when-full"]?.boolValue ?? false }
 
-    @StateObject private var batteryManager = BatteryManager()
+    @StateObject private var batteryManager = BatteryManager.shared
     private var level: Int { batteryManager.batteryLevel }
     private var isCharging: Bool { batteryManager.isCharging }
     private var isPluggedIn: Bool { batteryManager.isPluggedIn }
+    private var shouldHide: Bool { hideWhenFull && level == 100 && isPluggedIn }
 
     @State private var rect: CGRect = CGRect()
 
     var body: some View {
-        ZStack {
-            ZStack(alignment: .leading) {
-                BatteryBodyView(mask: false)
-                    .opacity(showPercentage ? 0.3 : 0.4)
-                BatteryBodyView(mask: true)
-                    .clipShape(
-                        Rectangle().path(
-                            in: CGRect(
-                                x: showPercentage ? 0 : 2,
-                                y: 0,
-                                width: 30 * Int(level)
-                                    / (showPercentage ? 110 : 130),
-                                height: .bitWidth
+        Group {
+            if !shouldHide {
+                Button(action: {
+                    MenuBarPopup.show(rect: rect, id: "battery") {
+                        BatteryPopup(configProvider: configProvider)
+                    }
+                }) {
+                    ZStack(alignment: .leading) {
+                        BatteryBodyView(mask: false)
+                            .opacity(showPercentage ? 0.3 : 0.4)
+                        BatteryBodyView(mask: true)
+                            .clipShape(
+                                Rectangle().path(
+                                    in: CGRect(
+                                        x: showPercentage ? 0 : 2,
+                                        y: 0,
+                                        width: 30 * Int(level)
+                                            / (showPercentage ? 110 : 130),
+                                        height: .bitWidth
+                                    )
+                                )
                             )
+                            .foregroundStyle(batteryColor)
+                        BatteryText(
+                            level: level, isCharging: isCharging,
+                            isPluggedIn: isPluggedIn
                         )
+                        .foregroundStyle(batteryTextColor)
+                    }
+                    .frame(width: 30, height: 10)
+                    .background(
+                        GeometryReader { geometry in
+                            Color.clear
+                                .onAppear {
+                                    rect = geometry.frame(in: .global)
+                                }
+                                .onChange(of: geometry.frame(in: .global)) {
+                                    oldState, newState in
+                                    rect = newState
+                                }
+                        }
                     )
-                    .foregroundStyle(batteryColor)
-                BatteryText(
-                    level: level, isCharging: isCharging,
-                    isPluggedIn: isPluggedIn
-                )
-                .foregroundStyle(batteryTextColor)
-            }
-            .frame(width: 30, height: 10)
-            .background(
-                GeometryReader { geometry in
-                    Color.clear
-                        .onAppear {
-                            rect = geometry.frame(in: .global)
-                        }
-                        .onChange(of: geometry.frame(in: .global)) {
-                            oldState, newState in
-                            rect = newState
-                        }
                 }
-            )
+                .transition(.blurReplace)
+            } else {
+                EmptyView()
+            }
         }
-        .experimentalConfiguration(cornerRadius: 15)
-        .frame(maxHeight: .infinity)
-        .background(.black.opacity(0.001))
-        .onTapGesture {
-            MenuBarPopup.show(rect: rect, id: "battery") { BatteryPopup() }
-        }
-
+        .animation(.smooth, value: shouldHide)
     }
 
     private var batteryTextColor: Color {
@@ -113,7 +122,7 @@ private struct BatteryText: View {
             }
         }
         .foregroundStyle(
-            showPercentage ? .foregroundOutsideInvert : .foregroundOutside
+            showPercentage ? Color.foregroundOutsideInvert : .foregroundOutside
         )
         .fontWeight(.semibold)
         .transition(.blurReplace)

@@ -1,9 +1,10 @@
 import SwiftUI
 
-private var panel: NSPanel?
+private var panel: HidingPanel?
 
 class HidingPanel: NSPanel, NSWindowDelegate {
     var hideTimer: Timer?
+    var contentIdentifier: String?
 
     override var canBecomeKey: Bool {
         return true
@@ -22,7 +23,10 @@ class HidingPanel: NSPanel, NSWindowDelegate {
     }
 
     func windowDidResignKey(_ notification: Notification) {
-        NotificationCenter.default.post(name: .willHideWindow, object: nil)
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .willHideWindow, object: nil)
+        }
+
         hideTimer = Timer.scheduledTimer(
             withTimeInterval: TimeInterval(
                 Constants.menuBarPopupAnimationDurationInMilliseconds) / 1000.0,
@@ -34,38 +38,39 @@ class HidingPanel: NSPanel, NSWindowDelegate {
 }
 
 class MenuBarPopup {
-    static var lastContentIdentifier: String? = nil
-
     static func show<Content: View>(
         rect: CGRect, id: String, @ViewBuilder content: @escaping () -> Content
     ) {
         guard let panel = panel else { return }
 
-        if panel.isKeyWindow, lastContentIdentifier == id {
-            NotificationCenter.default.post(name: .willHideWindow, object: nil)
+        if panel.isKeyWindow, panel.contentIdentifier == id {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .willHideWindow, object: nil)
+            }
+
             let duration =
                 Double(Constants.menuBarPopupAnimationDurationInMilliseconds)
                 / 1000.0
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                 panel.orderOut(nil)
-                lastContentIdentifier = nil
+                panel.contentIdentifier = nil
             }
             return
         }
 
         let isContentChange =
             panel.isKeyWindow
-            && (lastContentIdentifier != nil && lastContentIdentifier != id)
-        lastContentIdentifier = id
+            && (panel.contentIdentifier != nil && panel.contentIdentifier != id)
+        panel.contentIdentifier = id
 
-        if let hidingPanel = panel as? HidingPanel {
-            hidingPanel.hideTimer?.invalidate()
-            hidingPanel.hideTimer = nil
-        }
+        panel.hideTimer?.invalidate()
+        panel.hideTimer = nil
 
         if panel.isKeyWindow {
-            NotificationCenter.default.post(
-                name: .willChangeContent, object: nil)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .willChangeContent, object: nil)
+            }
+
             let baseDuration =
                 Double(Constants.menuBarPopupAnimationDurationInMilliseconds)
                 / 1000.0
@@ -80,12 +85,11 @@ class MenuBarPopup {
                             .position(x: rect.midX)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .id(UUID())
                 )
                 panel.makeKeyAndOrderFront(nil)
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(
-                        name: .willShowWindow, object: nil)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    NotificationCenter.default.post(name: .willShowWindow, object: nil)
                 }
             }
         } else {
@@ -100,20 +104,25 @@ class MenuBarPopup {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             )
             panel.makeKeyAndOrderFront(nil)
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(
-                    name: .willShowWindow, object: nil)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                NotificationCenter.default.post(name: .willShowWindow, object: nil)
             }
         }
     }
 
     static func setup() {
-        guard let screen = NSScreen.main?.visibleFrame else { return }
+        // Close existing panel if any
+        panel?.close()
+        panel = nil
+
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let frame = screen.frame
         let panelFrame = NSRect(
-            x: 0,
-            y: 0,
-            width: screen.size.width,
-            height: screen.size.height
+            x: frame.minX,
+            y: frame.minY,
+            width: frame.width,
+            height: frame.height
         )
 
         let newPanel = HidingPanel(
