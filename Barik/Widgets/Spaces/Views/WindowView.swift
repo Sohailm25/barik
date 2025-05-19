@@ -32,17 +32,18 @@ struct WindowView: View {
         let title =
             sameAppCount > 1
                 && !alwaysDisplayAppTitleFor.contains { $0 == window.appName }
-            ? window.title : (window.appName ?? "")
+            ? window.title ?? "" : (window.appName ?? "")
         let spaceIsFocused = space.windows.contains { $0.isFocused }
         Button(action: {
-            viewModel.switchToSpace(space)
+            viewModel.focusSpace(spaceId: space.id)
             usleep(100_000)
-            viewModel.switchToWindow(window)
+            viewModel.focusWindow(windowId: window.id)
         }) {
             HStack {
                 ZStack {
-                    if let icon = window.appIcon {
-                        Image(nsImage: icon)
+                    // Get the app icon - try multiple methods
+                    if let appIcon = getAppIcon() {
+                        Image(nsImage: appIcon)
                             .resizable()
                             .frame(width: size, height: size)
                             .shadow(
@@ -85,5 +86,33 @@ struct WindowView: View {
                 isHovered = $0
             }
         }.buttonStyle(TransparentButtonStyle())
+    }
+    
+    /// Get the app icon for the window using various methods
+    private func getAppIcon() -> NSImage? {
+        // Method 1: Use bundle identifier if available
+        if let bundleId = window.appBundleIdentifier, !bundleId.isEmpty, 
+           let icon = IconCache.shared.getIcon(for: bundleId) {
+            return icon
+        }
+        
+        // Method 2: Try to get icon by app URL if app name is available
+        if let appName = window.appName {
+            // Try bundle identifier
+            if let bundleId = window.appBundleIdentifier, 
+               let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
+                let icon = NSWorkspace.shared.icon(forFile: url.path)
+                return icon
+            }
+            
+            // Try app name path
+            let appPath = "/Applications/\(appName).app"
+            if FileManager.default.fileExists(atPath: appPath) {
+                let icon = NSWorkspace.shared.icon(forFile: appPath)
+                return icon
+            }
+        }
+        
+        return nil
     }
 }

@@ -1,11 +1,11 @@
 import AppKit
 
 struct AeroWindow: WindowModel {
-    let id: Int
-    let title: String
+    let id: String
+    let title: String?
     let appName: String?
-    var isFocused: Bool = false
-    var appIcon: NSImage?
+    var isFocused: Bool
+    let appBundleIdentifier: String?
     let workspace: String?
 
     enum CodingKeys: String, CodingKey {
@@ -17,15 +17,22 @@ struct AeroWindow: WindowModel {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
-        title = try container.decode(String.self, forKey: .title)
+        let intId = try container.decode(Int.self, forKey: .id)
+        id = String(intId)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
         appName = try container.decodeIfPresent(String.self, forKey: .appName)
-        workspace = try container.decodeIfPresent(
-            String.self, forKey: .workspace)
+        workspace = try container.decodeIfPresent(String.self, forKey: .workspace)
         isFocused = false
-        if let name = appName {
-            appIcon = IconCache.shared.icon(for: name)
-        }
+        appBundleIdentifier = nil // Aerospace doesn't provide bundle identifiers directly
+    }
+    
+    init(id: String, title: String?, appName: String?, workspace: String?, isFocused: Bool = false) {
+        self.id = id
+        self.title = title
+        self.appName = appName
+        self.workspace = workspace
+        self.isFocused = isFocused
+        self.appBundleIdentifier = nil
     }
 }
 
@@ -33,8 +40,8 @@ struct AeroSpace: SpaceModel {
     typealias WindowType = AeroWindow
     let workspace: String
     var id: String { workspace }
-    var isFocused: Bool = false
-    var windows: [AeroWindow] = []
+    var isFocused: Bool
+    var windows: [AeroWindow]
 
     enum CodingKeys: String, CodingKey {
         case workspace
@@ -43,10 +50,11 @@ struct AeroSpace: SpaceModel {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         workspace = try container.decode(String.self, forKey: .workspace)
+        isFocused = false
+        windows = []
     }
 
-    init(workspace: String, isFocused: Bool = false, windows: [AeroWindow] = [])
-    {
+    init(workspace: String, isFocused: Bool = false, windows: [AeroWindow] = []) {
         self.workspace = workspace
         self.isFocused = isFocused
         self.windows = windows

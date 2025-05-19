@@ -34,7 +34,7 @@ struct MenuItemView: View {
                 }
             } label: {
                 HStack {
-                    if let icon = IconCache.shared.icon(for: menuItem.title) {
+                    if let icon = IconCache.shared.getIcon(for: menuItem.title) {
                         Image(nsImage: icon)
                             .resizable()
                             .frame(width: size, height: size)

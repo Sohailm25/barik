@@ -35,7 +35,7 @@ struct SpaceView: View {
     }
 
     var body: some View {
-        Button(action: { viewModel.switchToSpace(space, needWindowFocus: true) }) {
+        Button(action: { viewModel.focusSpace(spaceId: space.id, needWindowFocus: true) }) {
             HStack(spacing: 0) {
                 Spacer().frame(width: 10)
                 if isNavigator && showKey {

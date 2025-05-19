@@ -1,9 +1,17 @@
 import Foundation
 
-class AerospaceSpacesProvider: SpacesProvider, SwitchableSpacesProvider {
+/// Provider for Aerospace window manager spaces integration
+final class AerospaceSpacesProvider: SpacesProvider, SwitchableSpacesProvider, PollingBasedSpacesProvider {
     typealias SpaceType = AeroSpace
+    
+    /// Path to the aerospace executable
     let executablePath = ConfigManager.shared.config.aerospace.path
+    
+    /// Polling interval for Aerospace (in seconds)
+    var pollingInterval: TimeInterval { 0.1 }
 
+    /// Retrieves all spaces with their windows from Aerospace
+    /// - Returns: Array of spaces with windows or nil if fetching failed
     func getSpacesWithWindows() -> [AeroSpace]? {
         guard var spaces = fetchSpaces(), let windows = fetchWindows() else {
             return nil
