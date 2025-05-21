@@ -128,9 +128,12 @@ spacing = 15              # spacing between widgets
 [experimental.foreground.widgets-background] # settings for widgets background
 displayed = false                            # wrap widgets in their own background
 blur = 3                                     # background type: from 1 to 6 for blur intensity
-```
 
-Currently, you can customize the order of widgets (time, indicators, etc.) and adjust some of their settings. Soon, you’ll also be able to add custom widgets and completely change **barik**'s appearance—making it almost unrecognizable (hello, r/unixporn!).
+# Enables event-based handling for Yabai spaces and windows
+# This provides more accurate tracking in complex window management scenarios
+experimental.event-based-yabai-provider = false       # defaults to false
+```
+Currently, you can customize the order of widgets (time, indicators, etc.) and adjust some of their settings. Soon, you'll also be able to add custom widgets and completely change **barik**'s appearance—making it almost unrecognizable (hello, r/unixporn!).
 
 ## Future Plans
 
@@ -153,7 +156,7 @@ Create an issue so we can add your favorite music service: https://github.com/mo
 
 Menu items (such as File, Edit, View, etc.) are not currently supported, but they are planned for future releases. However, you can use [Raycast](https://www.raycast.com/), which supports menu items through an interface similar to Spotlight. I personally use it with the `option + tab` shortcut, and it works very well.
 
-If you’re accustomed to using menu items from the system menu bar, simply move your mouse to the top of the screen to reveal the system menu bar, where they will be available.
+If you're accustomed to using menu items from the system menu bar, simply move your mouse to the top of the screen to reveal the system menu bar, where they will be available.
 
 <img src="resources/raycast-menu-items.jpeg" alt="Raycast Menu Items">
 
@@ -172,3 +175,4 @@ Apple and macOS are trademarks of Apple Inc. This project is not connected to Ap
 ## Stars
 
 [![Stargazers over time](https://starchart.cc/mocki-toki/barik.svg?variant=adaptive)](https://starchart.cc/mocki-toki/barik)
+

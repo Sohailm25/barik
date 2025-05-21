@@ -518,6 +518,6 @@ final class NowPlayingManager: ObservableObject {
 
         let position = progress * duration
         nowPlaying = nowPlaying?.copyWith(position: position)
-        NowPlayingProvider.seek(to: position, appBundleIdentifier: currentSong.appBundleIdentifier)
+        _ = NowPlayingProvider.seek(to: position, appBundleIdentifier: currentSong.appBundleIdentifier)
     }
 }

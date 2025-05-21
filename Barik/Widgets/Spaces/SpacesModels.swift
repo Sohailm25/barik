@@ -103,7 +103,7 @@ struct AnyWindow: Identifiable, Equatable, Codable {
 /// Type-erased space model that can hold any space model type
 struct AnySpace: Identifiable, Equatable {
     let id: String
-    let isFocused: Bool
+    var isFocused: Bool
     let windows: [AnyWindow]
     
     init<S: SpaceModel>(_ space: S) {

@@ -254,16 +254,19 @@ struct ExperimentalConfig: Decodable {
     let foreground: ForegroundConfig
     let background: BackgroundConfig
     let appMenu: AppMenuConfig
+    let eventBasedYabaiProvider: Bool
 
     enum CodingKeys: String, CodingKey {
         case foreground, background
         case appMenu = "app-menu"
+        case eventBasedYabaiProvider = "event-based-yabai-provider"
     }
 
     init() {
         self.foreground = ForegroundConfig()
         self.background = BackgroundConfig()
         self.appMenu = AppMenuConfig()
+        self.eventBasedYabaiProvider = false
     }
 
     init(from decoder: Decoder) throws {
@@ -279,6 +282,9 @@ struct ExperimentalConfig: Decodable {
         appMenu =
             try container.decodeIfPresent(AppMenuConfig.self, forKey: .appMenu)
             ?? AppMenuConfig()
+        eventBasedYabaiProvider = 
+            try container.decodeIfPresent(Bool.self, forKey: .eventBasedYabaiProvider)
+            ?? false
     }
 }
 

@@ -1,6 +1,6 @@
 import AppKit
 
-struct YabaiWindow: WindowModel {
+struct YabaiWindow: WindowModel, Equatable {
     let id: String
     let title: String?
     let appName: String?
@@ -38,9 +38,21 @@ struct YabaiWindow: WindowModel {
         isSticky = try container.decode(Bool.self, forKey: .isSticky)
         appBundleIdentifier = nil // Yabai doesn't provide bundle identifiers directly
     }
+    
+    static func == (lhs: YabaiWindow, rhs: YabaiWindow) -> Bool {
+        return lhs.id == rhs.id &&
+               lhs.title == rhs.title &&
+               lhs.appName == rhs.appName &&
+               lhs.isFocused == rhs.isFocused &&
+               lhs.stackIndex == rhs.stackIndex &&
+               lhs.isHidden == rhs.isHidden &&
+               lhs.isFloating == rhs.isFloating &&
+               lhs.isSticky == rhs.isSticky &&
+               lhs.spaceId == rhs.spaceId
+    }
 }
 
-struct YabaiSpace: SpaceModel {
+struct YabaiSpace: SpaceModel, Equatable {
     typealias WindowType = YabaiWindow
     
     var id: String { String(index) }
@@ -63,5 +75,11 @@ struct YabaiSpace: SpaceModel {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(index, forKey: .index)
         try container.encode(isFocused, forKey: .isFocused)
+    }
+    
+    static func == (lhs: YabaiSpace, rhs: YabaiSpace) -> Bool {
+        return lhs.id == rhs.id &&
+               lhs.isFocused == rhs.isFocused &&
+               lhs.windows == rhs.windows
     }
 }
