@@ -348,8 +348,6 @@ final class SpacesViewModel: ObservableObject {
             let hasChanges = sortedSpaces != currentSpacesCopy
             
             if hasChanges {
-                print("Spaces changed: \(sortedSpaces.count) spaces, \(sortedSpaces.reduce(0) { $0 + $1.windows.count }) windows")
-                
                 DispatchQueue.main.async {
                     self.spaces = sortedSpaces
                 }

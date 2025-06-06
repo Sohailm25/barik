@@ -8,7 +8,7 @@ final class AerospaceSpacesProvider: SpacesProvider, SwitchableSpacesProvider, P
     let executablePath = ConfigManager.shared.config.aerospace.path
     
     /// Polling interval for Aerospace (in seconds)
-    var pollingInterval: TimeInterval { 0.1 }
+    var pollingInterval: TimeInterval { 0.5 }
 
     /// Retrieves all spaces with their windows from Aerospace
     /// - Returns: Array of spaces with windows or nil if fetching failed
@@ -60,17 +60,69 @@ final class AerospaceSpacesProvider: SpacesProvider, SwitchableSpacesProvider, P
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
+        
         let pipe = Pipe()
         process.standardOutput = pipe
+        
+        // Add error handling for standard error
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
+        
+        // Use a semaphore to control synchronization
+        let outputSemaphore = DispatchSemaphore(value: 0)
+        var outputData: Data?
+        var commandError: Error?
+        
+        // Set up asynchronous reading to avoid deadlocks
+        let outputHandle = pipe.fileHandleForReading
+        outputHandle.readabilityHandler = { fileHandle in
+            let data = fileHandle.availableData
+            if data.count > 0 {
+                if outputData == nil {
+                    outputData = data
+                } else {
+                    outputData?.append(data)
+                }
+            } else {
+                // EOF reached, signal completion
+                outputHandle.readabilityHandler = nil
+                outputSemaphore.signal()
+            }
+        }
+        
         do {
             try process.run()
         } catch {
             print("Aerospace error: \(error)")
             return nil
         }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        return data
+        
+        // Wait for process with a reasonable timeout (2 seconds)
+        let timeoutResult = DispatchTimeoutResult.success
+        
+        // If process takes too long, kill it
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2.0) {
+            if process.isRunning {
+                process.terminate()
+                if outputData == nil {
+                    commandError = NSError(domain: "AerospaceProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Command timed out"])
+                }
+                outputSemaphore.signal()
+            }
+        }
+        
+        // Wait for output completion
+        _ = outputSemaphore.wait(timeout: .now() + 2.0)
+        
+        // Cleanup
+        outputHandle.readabilityHandler = nil
+        
+        if let error = commandError {
+            print("Aerospace command error: \(error)")
+            return nil
+        }
+        
+        return outputData
     }
 
     private func fetchSpaces() -> [AeroSpace]? {
