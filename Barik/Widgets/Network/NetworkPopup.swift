@@ -30,10 +30,9 @@ struct NetworkPopup: View {
             }
         }
         .padding(25)
-        .background(Color.black)
     }
 
-    /// Chooses the Wi‑Fi icon based on the status and connection availability.
+    /// Chooses the Wi‑Fi icon based on the stat us and connection availability.
     private var wifiIcon: some View {
         if viewModel.ssid == "Not connected" {
             return Image(systemName: "wifi.slash")

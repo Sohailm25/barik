@@ -12,6 +12,7 @@ struct MenuBarPopupView<Content: View>: View {
     @State private var contentHeight: CGFloat = 0
     @State private var viewFrame: CGRect = .zero
     @State private var animationValue: Double = 0.01
+    @State private var scaleYAnimationValue: Double = 0.01
     @State private var isShowAnimation = false
     @State private var isHideAnimation = false
     @State private var isResizeAnimation = false
@@ -34,15 +35,30 @@ struct MenuBarPopupView<Content: View>: View {
     }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        let cornerRadiusValue = ((1.0 - animationValue) * 1) + 40
+        let blurRadiusValue = (1.0 - (0.1 + 0.9 * animationValue)) * 20
+        let scaleXValue = 0.2 + 0.8 * animationValue
+        
+        return ZStack(alignment: .topTrailing) {
             content
-                .background(Color.black)
-                .cornerRadius(((1.0 - animationValue) * 1) + 40)
+                .background(
+                    ZStack {
+                        VisualEffectBlur(material: .menu, blendingMode: .behindWindow)
+                            .clipShape(RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous))
+                        Color.backgroundPopup
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous)
+                        .stroke(GlassGradient.gradient, lineWidth: 2)
+                )
                 .padding(.top, foregroundHeight + 5)
                 .offset(x: computedOffset, y: computedYOffset)
                 .shadow(radius: 30)
-                .blur(radius: (1.0 - (0.1 + 0.9 * animationValue)) * 20)
-                .scaleEffect(x: 0.2 + 0.8 * animationValue, y: animationValue)
+                .blur(radius: blurRadiusValue)
+                .scaleEffect(x: scaleXValue)
+                .scaleEffect(y: scaleYAnimationValue)
                 .opacity(animationValue)
                 .transaction { transaction in
                     if isHideAnimation {
@@ -60,6 +76,15 @@ struct MenuBarPopupView<Content: View>: View {
                             ) / 1000.0, extraBounce: 0.3)
                     ) {
                         animationValue = 1.0
+                    }
+                    withAnimation(
+                        .smooth(
+                            duration: Double(
+                                Constants
+                                    .menuBarPopupAnimationDurationInMilliseconds
+                            ) / 1000.0, extraBounce: 0.38)
+                    ) {
+                        scaleYAnimationValue = 1.0
                     }
                     DispatchQueue.main.asyncAfter(
                         deadline: .now()
@@ -82,6 +107,7 @@ struct MenuBarPopupView<Content: View>: View {
                             ) / 1000.0)
                     ) {
                         animationValue = 0.01
+                        scaleYAnimationValue = 0.01
                     }
                     DispatchQueue.main.asyncAfter(
                         deadline: .now()
@@ -105,6 +131,7 @@ struct MenuBarPopupView<Content: View>: View {
                             ) / 1000.0)
                     ) {
                         animationValue = 0.01
+                        scaleYAnimationValue = 0.01
                     }
                     DispatchQueue.main.asyncAfter(
                         deadline: .now()
@@ -149,8 +176,7 @@ struct MenuBarPopupView<Content: View>: View {
                     }
             }
         )
-        .foregroundStyle(.white)
-        .preferredColorScheme(.dark)
+        .foregroundStyle(.foregroundPopup)
         .buttonStyle(DefaultButtonStyle())
     }
 

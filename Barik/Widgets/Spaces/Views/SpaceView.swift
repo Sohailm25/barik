@@ -35,6 +35,7 @@ struct SpaceView: View {
     }
 
     var body: some View {
+        let cornerRadiusValue = foregroundHeight < 30 ? 0.0 : 8.0
         Button(action: { viewModel.switchToSpace(space, needWindowFocus: true) }) {
             HStack(spacing: 0) {
                 Spacer().frame(width: 10)
@@ -60,7 +61,11 @@ struct SpaceView: View {
             .background(backgroundColor)
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: foregroundHeight < 30 ? 0 : 8, style: .continuous)
+                    cornerRadius: cornerRadiusValue, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous)
+                    .stroke(GlassGradient.gradient, lineWidth: 1)
             )
             .shadow(color: .shadow, radius: foregroundHeight < 30 ? 0 : 2)
         }.buttonStyle(TransparentButtonStyle())

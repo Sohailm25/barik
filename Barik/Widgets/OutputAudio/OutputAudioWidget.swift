@@ -35,9 +35,12 @@ struct OutputAudioWidget: View {
                 view
                     .frame(height: foregroundHeight < 45 ? 20 : 25)
                     .frame(width: foregroundHeight < 45 ? 20 : 25)
-                    .background(configManager.config.experimental.foreground.widgetsBackground.blur)
+                    .background(.noActive)
                     .clipShape(Capsule()).overlay(
-                        Capsule().stroke(Color.noActive, lineWidth: 1)
+                        Capsule().stroke(
+                            GlassGradient.gradient,
+                            lineWidth: 1
+                        )
                     )
             }
             .background(

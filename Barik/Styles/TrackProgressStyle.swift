@@ -20,7 +20,7 @@ private struct TrackProgressContent: View {
                 Rectangle()
                     .fill(.gray.opacity(0.3))
                 Rectangle()
-                    .fill(isHovered ? .white : .white.opacity(0.8))
+                    .fill(isHovered ? .foregroundPopup : .foregroundPopup.opacity(0.6))
                     .frame(width: geometry.size.width * CGFloat(fractionCompleted))
                     .animation(.interactiveSpring.speed(2), value: fractionCompleted)
             }

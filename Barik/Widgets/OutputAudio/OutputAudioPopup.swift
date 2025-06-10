@@ -14,24 +14,24 @@ struct OutputAudioDeviceRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 ZStack {
-                    Circle()
-                        .fill(device.isActive ? .blue : .gray.opacity(0.3))
-                        .font(.system(size: 13))
-                    Image(systemName: device.iconName)
-                        .font(.system(size: 13))
+                    if(device.isActive) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 13, weight: .bold))
+                    } else {
+                        EmptyView()
+                    }
                 }
-                .frame(width: 25, height: 25)
+                .frame(width: 20, height: 20)
 
                 Text(device.name)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 15,  weight: .medium))
 
                 Spacer()
             }
         }
         .buttonStyle(DefaultButtonStyle(pressedScaleEffect: 0.95))
-        .padding(.vertical, 2)
     }
 
     // Removed battery logic, add back if relevant for certain audio devices
@@ -42,7 +42,7 @@ struct OutputAudioDeviceListView: View {
     @ObservedObject private var audioManager = OutputAudioManager.shared
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 10) {
             if !audioManager.devices.isEmpty {
                 // Сортируем устройства по имени для стабильного порядка
                 let sortedDevices = audioManager.devices.sorted { $0.name < $1.name }
@@ -75,36 +75,36 @@ struct OutputAudioPopupBox: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
-                Image(
-                    systemName: "speaker.fill"
-                )
-                .foregroundColor(.gray)
-
-                BarikSlider(value: $sliderVolume)  // Убраны лишние параметры
-                    .onChange(of: sliderVolume) { _, newValue in
-                        audioManager.setVolume(Float(newValue))
-                    }
-                
-                Image(
-                    systemName: "speaker.3.fill"
-                )
-                .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 25)
-            .padding(.top, 20)
-            .padding(.bottom, 8)
-            .onAppear {
-                sliderVolume = Double(audioManager.currentVolume)  // Конвертируем Float в Double
-            }
-            .onChange(of: audioManager.currentVolume) { _, newValue in
-                sliderVolume = Double(newValue)  // Конвертируем Float в Double
-            }
-
-            Divider()
+//            HStack {
+//                Image(
+//                    systemName: "speaker.fill"
+//                )
+//                .foregroundColor(.gray)
+//
+//                BarikSlider(value: $sliderVolume)  // Убраны лишние параметры
+//                    .onChange(of: sliderVolume) { _, newValue in
+//                        audioManager.setVolume(Float(newValue))
+//                    }
+//                
+//                Image(
+//                    systemName: "speaker.3.fill"
+//                )
+//                .foregroundColor(.gray)
+//            }
+//            .padding(.horizontal, 25)
+//            .padding(.top, 20)
+//            .padding(.bottom, 8)
+//            .onAppear {
+//                sliderVolume = Double(audioManager.currentVolume)  // Конвертируем Float в Double
+//            }
+//            .onChange(of: audioManager.currentVolume) { _, newValue in
+//                sliderVolume = Double(newValue)  // Конвертируем Float в Double
+//            }
+//
+//            Divider()
             OutputAudioDeviceListView()
-                .padding(.top, 5)
-                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.horizontal, 10)
                 .padding(.bottom, 20)
         }
         .frame(width: 250)  // Adjust width if needed

@@ -40,7 +40,7 @@ struct ButtonStyleContent: View {
     var body: some View {
         configuration.label
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                Capsule()
                     .fill(
                         isHovered || configuration.isPressed || selected
                             ? .hovered : Color.black.opacity(0.0001)
@@ -60,5 +60,6 @@ struct ButtonStyleContent: View {
             .onHover { hovering in
                 isHovered = hovering
             }
+            .animation(.easeOut(duration: isHovered ? 0.05 : 0.1), value: isHovered)
     }
 }

@@ -50,9 +50,6 @@ struct MenuBarView: View {
             NowPlayingWidget()
                 .environmentObject(config)
 
-        case "default.keyboardlayout":
-            KeyboardLayoutWidget().environmentObject(config)
-
         case "default.bluetooth":
             BluetoothWidget().environmentObject(config)
 
