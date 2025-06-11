@@ -18,7 +18,7 @@ struct OutputAudioDeviceRow: View {
                 ZStack {
                     if(device.isActive) {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                     } else {
                         EmptyView()
                     }
@@ -26,7 +26,7 @@ struct OutputAudioDeviceRow: View {
                 .frame(width: 20, height: 20)
 
                 Text(device.name)
-                    .font(.system(size: 15,  weight: .medium))
+                    .font(.system(size: 13,  weight: .medium))
 
                 Spacer()
             }

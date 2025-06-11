@@ -63,16 +63,15 @@ struct BatteryPopupVertical: View {
                     .resizable()
                     .scaledToFit()
                     .padding(10)
-                    .foregroundColor(.white)
                 if batteryManager.isPluggedIn {
                     Image(
                         systemName: batteryManager.isCharging
                             ? "bolt.fill" : "powerplug.portrait.fill"
                     )
-                    .foregroundColor(.white)
                     .offset(y: -24)
-                    .shadow(color: Color.black, radius: 2, x: 0, y: 0)
-                    .shadow(color: Color.black, radius: 2, x: 0, y: 0)
+                    .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
+                    .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
+                    .foregroundColor(.foregroundPopup)
                     .transition(.blurReplace)
                 }
             }
@@ -98,7 +97,7 @@ struct BatteryPopupVertical: View {
             } else if batteryManager.batteryLevel <= 20 {
                 return .yellow
             } else {
-                return .white
+                return .foregroundPopup
             }
         }
     }
@@ -124,16 +123,15 @@ struct BatteryPopupHorizontal: View {
                 .resizable()
                 .scaledToFit()
                 .padding(14)
-                .foregroundColor(.white)
             if batteryManager.isPluggedIn {
                 Image(
                     systemName: batteryManager.isCharging
                         ? "bolt.fill" : "powerplug.portrait.fill"
                 )
-                .foregroundColor(.white)
+                .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
+                .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
+                .foregroundColor(.foregroundPopup)
                 .offset(y: -30)
-                .shadow(color: Color.black, radius: 2, x: 0, y: 0)
-                .shadow(color: Color.black, radius: 2, x: 0, y: 0)
                 .transition(.blurReplace)
             }
         }
@@ -150,7 +148,7 @@ struct BatteryPopupHorizontal: View {
             } else if batteryManager.batteryLevel <= 20 {
                 return .yellow
             } else {
-                return .white
+                return .foregroundPopup
             }
         }
     }
@@ -159,11 +157,9 @@ struct BatteryPopupHorizontal: View {
 struct BatteryPopup_Previews: PreviewProvider {
     static var previews: some View {
         BatteryPopupVertical()
-            .background(Color.black)
             .previewLayout(.sizeThatFits)
             .environmentObject(ConfigProvider(config: ConfigData()))
         BatteryPopupHorizontal()
-            .background(Color.black)
             .previewLayout(.sizeThatFits)
             .environmentObject(ConfigProvider(config: ConfigData()))
     }

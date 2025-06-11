@@ -24,7 +24,9 @@ struct BluetoothDeviceRow: View {
                         )
                         .font(.system(size: 13))
                     Image(systemName: device.type.iconName)
-                        .foregroundStyle(.white)
+                        .if(device.status == DeviceStatus.connected) {
+                            $0.foregroundStyle(.white)
+                        }
                 }
                     .frame(width: 25, height: 25)
                     .opacity(device.status == DeviceStatus.connecting ? 0.5 : 1)
@@ -35,7 +37,7 @@ struct BluetoothDeviceRow: View {
                     if device.status == DeviceStatus.connected {
                     Text("Connected")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.gray)
+                        .opacity(0.8)
                         .transition(.blurReplace)
                     }
                 }

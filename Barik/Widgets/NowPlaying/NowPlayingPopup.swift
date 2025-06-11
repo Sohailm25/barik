@@ -91,14 +91,14 @@ private struct NowPlayingVerticalPopup: View {
                 ) { image in
                     image.clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
-                .frame(width: 200, height: 200)
-                .scaleEffect(song.state == .paused ? 0.9 : 1)
                 .overlay(
                     song.state == .paused
                         ? Color.black.opacity(0.3)
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         : nil
                 )
+                .frame(width: 200, height: 200)
+                .scaleEffect(song.state == .paused ? 0.9 : 1)
                 .animation(.smooth(duration: 0.5, extraBounce: 0.4), value: song.state == .paused)
 
                 VStack(alignment: .center) {

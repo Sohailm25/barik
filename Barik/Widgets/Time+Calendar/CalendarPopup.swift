@@ -57,7 +57,6 @@ struct CalendarBoxPopup: View {
         }
         .padding(30)
         .fontWeight(.semibold)
-        .foregroundStyle(.white)
     }
 }
 
@@ -98,7 +97,6 @@ struct CalendarVerticalPopup: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 30)
         .fontWeight(.semibold)
-        .foregroundStyle(.white)
     }
 }
 
@@ -141,7 +139,6 @@ struct CalendarHorizontalPopup: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 30)
         .fontWeight(.semibold)
-        .foregroundStyle(.white)
     }
 }
 
@@ -210,7 +207,7 @@ private struct WeekdayHeaderView: View {
                 let isWeekend = calendar.isDateInWeekend(
                     referenceDays[originalIndex]
                 )
-                let color = isWeekend ? Color.gray : Color.white
+                let color = isWeekend ? Color.foregroundPopup.opacity(0.5) : Color.foregroundPopup
 
                 Text(reordered[i])
                     .frame(width: 30)
@@ -243,18 +240,22 @@ private struct CalendarDaysView: View {
                             let isWeekend = calendar.isDateInWeekend(date)
                             let color =
                                 isToday(day: day)
-                                ? Color.black
-                                : (isWeekend ? Color.gray : Color.white)
+                                ? .foregroundPopup
+                            : (isWeekend ? Color.foregroundPopup.opacity(0.5) : .foregroundPopup)
 
                             ZStack {
                                 if isToday(day: day) {
                                     Circle()
-                                        .fill(Color.white)
+                                        .fill(Color.foregroundPopup)
                                         .frame(width: 30, height: 30)
                                 }
                                 Text("\(day)")
                                     .foregroundColor(color)
                                     .frame(width: 30, height: 30)
+                                    .if(isToday(day: day)) {
+                                        $0.colorInvert()
+                                    }
+
                             }
                         } else {
                             Color.clear.frame(width: 30, height: 30)
@@ -304,7 +305,7 @@ private struct EventListView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(.foregroundPopup.opacity(0.5))
                 ForEach(events, id: \.eventIdentifier) { event in
                     EventRow(event: event)
                 }
@@ -337,7 +338,7 @@ private struct EventRow: View {
         .padding(5)
         .padding(.trailing, 5)
         .foregroundStyle(Color(event.calendar.cgColor))
-        .background(Color(event.calendar.cgColor).opacity(0.2))
+        .background(Color(event.calendar.cgColor).opacity(0.3))
         .cornerRadius(6)
         .frame(maxWidth: .infinity)
     }
@@ -370,15 +371,12 @@ struct CalendarPopup_Previews: PreviewProvider {
         let calendarManager = CalendarManager(configProvider: configProvider)
 
         CalendarBoxPopup()
-            .background(Color.black)
             .previewLayout(.sizeThatFits)
             .previewDisplayName("Box")
         CalendarVerticalPopup(calendarManager)
-            .background(Color.black)
             .frame(height: 600)
             .previewDisplayName("Vertical")
         CalendarHorizontalPopup(calendarManager)
-            .background(Color.black)
             .previewLayout(.sizeThatFits)
             .previewDisplayName("Horizontal")
     }

@@ -9,9 +9,13 @@ struct NetworkPopup: View {
             if viewModel.wifiState != .notSupported {
                 HStack(spacing: 8) {
                     wifiIcon
-                    Text(viewModel.ssid)
-                        .foregroundColor(.white)
-                        .font(.headline)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(viewModel.ssid)
+                            .font(.system(size: 13,  weight: .medium))
+                        Text(viewModel.wifiState.rawValue)
+                            .font(.system(size: 11, weight: .medium))
+                            .opacity(0.8)
+                    }
                 }
 
                 if viewModel.ssid != "Not connected"
