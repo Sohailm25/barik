@@ -21,6 +21,7 @@ struct BluetoothWidget: View {
                         .frame(width: 9, height: 14)
                         .foregroundColor(.foreground)
                 }
+                .frame(width: 14, height: 14)
                 .padding(.horizontal, 2)
                 .background(
                     GeometryReader { geometry in

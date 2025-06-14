@@ -47,7 +47,7 @@ struct MenuBarView: View {
             SpacesWidget().environmentObject(config)
 
         case "default.nowplaying":
-            NowPlayingWidget()
+            OutputAudioWidget(showBackground: false)
                 .environmentObject(config)
 
         case "default.bluetooth":

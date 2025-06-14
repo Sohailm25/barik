@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F6170E5F2DF2D4B4006E3188 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = F6170E5E2DF2D4B4006E3188 /* CLAUDE.md */; };
 		F66C98C52D60E35600C3C53C /* TOMLDecoder in Frameworks */ = {isa = PBXBuildFile; productRef = F66C98C42D60E35600C3C53C /* TOMLDecoder */; };
 		F6AA9B072D99E492005214BF /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = F6AA9B062D99E492005214BF /* Shimmer */; };
 		F6B514042D6C5F3400DFEB43 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = F6B514032D6C5F3400DFEB43 /* MarkdownUI */; };
@@ -15,7 +14,6 @@
 
 /* Begin PBXFileReference section */
 		C10E2F8A2D41235900AC957C /* Barik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Barik.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6170E5E2DF2D4B4006E3188 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -56,7 +54,6 @@
 		C10E2F812D41235900AC957C = {
 			isa = PBXGroup;
 			children = (
-				F6170E5E2DF2D4B4006E3188 /* CLAUDE.md */,
 				C10E2F8B2D41235900AC957C /* Products */,
 				C1BB4B332D526B5C00A1F46E /* Barik */,
 			);
@@ -160,7 +157,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6170E5F2DF2D4B4006E3188 /* CLAUDE.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
