@@ -1,4 +1,3 @@
-import EventKit
 import SwiftUI
 
 struct BatteryPopup: View {
@@ -47,36 +46,14 @@ struct BatteryPopupVertical: View {
 
     var body: some View {
         HStack {
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 4.5)
-                Circle()
-                    .trim(from: 0, to: CGFloat(batteryManager.batteryLevel) / 100)
-                    .stroke(
-                        batteryColor,
-                        style: StrokeStyle(lineWidth: 4.5, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                    .animation(
-                        .easeOut(duration: 0.5), value: batteryManager.batteryLevel)
-                Image(systemName: "laptopcomputer")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(10)
-                if batteryManager.isPluggedIn {
-                    Image(
-                        systemName: batteryManager.isCharging
-                            ? "bolt.fill" : "powerplug.portrait.fill"
-                    )
-                    .offset(y: -24)
-                    .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
-                    .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
-                    .foregroundColor(.foregroundPopup)
-                    .transition(.blurReplace)
-                }
-            }
-            .frame(width: 50, height: 50)
+            BatteryCircleView(
+                size: 50,
+                lineWidth: 4.5,
+                iconPadding: 10,
+                plugIconOffset: CGSize(width: 0, height: -24)
+            )
             .padding(.trailing, 10)
+            
             VStack(alignment: .leading) {
                 Text("MacBook Air")
                     .font(.title3)
@@ -87,34 +64,44 @@ struct BatteryPopupVertical: View {
         }
         .padding(30)
     }
-
-    private var batteryColor: Color {
-        if batteryManager.isCharging {
-            return .green
-        } else {
-            if batteryManager.batteryLevel <= 10 {
-                return .red
-            } else if batteryManager.batteryLevel <= 20 {
-                return .yellow
-            } else {
-                return .foregroundPopup
-            }
-        }
-    }
 }
 
 struct BatteryPopupHorizontal: View {
-    private var batteryManager = BatteryManager.shared
+    var body: some View {
+        BatteryCircleView(
+            size: 60,
+            lineWidth: 6,
+            iconPadding: 14,
+            plugIconOffset: CGSize(width: 0, height: -30)
+        )
+        .padding(30)
+    }
+}
 
+fileprivate struct BatteryCircleView: View {
+    let size: CGFloat
+    let lineWidth: CGFloat
+    let iconPadding: CGFloat
+    let plugIconOffset: CGSize
+    
+    private var batteryManager = BatteryManager.shared
+    
+    init(size: CGFloat, lineWidth: CGFloat, iconPadding: CGFloat, plugIconOffset: CGSize) {
+        self.size = size
+        self.lineWidth = lineWidth
+        self.iconPadding = iconPadding
+        self.plugIconOffset = plugIconOffset
+    }
+    
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.gray.opacity(0.3), lineWidth: 6)
+                .stroke(Color.gray.opacity(0.3), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: CGFloat(batteryManager.batteryLevel) / 100)
                 .stroke(
                     batteryColor,
-                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(Angle(degrees: -90))
                 .animation(
@@ -122,23 +109,22 @@ struct BatteryPopupHorizontal: View {
             Image(systemName: "laptopcomputer")
                 .resizable()
                 .scaledToFit()
-                .padding(14)
+                .padding(iconPadding)
             if batteryManager.isPluggedIn {
                 Image(
                     systemName: batteryManager.isCharging
                         ? "bolt.fill" : "powerplug.portrait.fill"
                 )
-                .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
-                .shadow(color: .foregroundPopupInverted, radius: 2, x: 0, y: 0)
+                .offset(plugIconOffset)
+                .shadow(color: .foregroundPopupInverted.opacity(0.8), radius: 2, x: 0, y: 0)
+                .shadow(color: .foregroundPopupInverted.opacity(0.8), radius: 2, x: 0, y: 0)
                 .foregroundColor(.foregroundPopup)
-                .offset(y: -30)
                 .transition(.blurReplace)
             }
         }
-        .frame(width: 60, height: 60)
-        .padding(30)
+        .frame(width: size, height: size)
     }
-
+    
     private var batteryColor: Color {
         if batteryManager.isCharging {
             return .green

@@ -9,31 +9,35 @@ struct OutputAudioPopup: View {
 }
 
 struct OutputAudioDeviceRow: View {
+    @ObservedObject private var audioManager = OutputAudioManager.shared
+    @State private var sliderVolume: Double = 0.0  // Изменено с Float на Double
     let device: OutputAudioDevice  // This struct needs to be defined in OutputAudioManager.swift
     let onSelect: () -> Void  // Changed from onConnection
 
     var body: some View {
-        Button(action: onSelect) {
-            HStack(spacing: 10) {
-                ZStack {
-                    if(device.isActive) {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .bold))
-                    } else {
-                        EmptyView()
+        VStack {
+            Button(action: onSelect) {
+                VStack {
+                    HStack(spacing: 10) {   
+                        ZStack {
+                            if(device.isActive) {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                            } else {
+                                EmptyView()
+                            }
+                        }
+                        .frame(width: 20, height: 20)
+                        
+                        Text(device.name)
+                            .font(.system(size: 13,  weight: .medium))
+                        
+                        Spacer()
                     }
-                }
-                .frame(width: 20, height: 20)
-
-                Text(device.name)
-                    .font(.system(size: 13,  weight: .medium))
-
-                Spacer()
+                }}.buttonStyle(DefaultButtonStyle(pressedScaleEffect: 0.95))
             }
         }
-        .buttonStyle(DefaultButtonStyle(pressedScaleEffect: 0.95))
-    }
-
+        
     // Removed battery logic, add back if relevant for certain audio devices
 }
 
@@ -71,43 +75,16 @@ struct OutputAudioDeviceListView: View {
 
 struct OutputAudioPopupBox: View {
     @ObservedObject private var audioManager = OutputAudioManager.shared
-    @State private var sliderVolume: Double = 0.0  // Изменено с Float на Double
 
     var body: some View {
         VStack(alignment: .leading) {
-//            HStack {
-//                Image(
-//                    systemName: "speaker.fill"
-//                )
-//                .foregroundColor(.gray)
-//
-//                BarikSlider(value: $sliderVolume)  // Убраны лишние параметры
-//                    .onChange(of: sliderVolume) { _, newValue in
-//                        audioManager.setVolume(Float(newValue))
-//                    }
-//                
-//                Image(
-//                    systemName: "speaker.3.fill"
-//                )
-//                .foregroundColor(.gray)
-//            }
-//            .padding(.horizontal, 25)
-//            .padding(.top, 20)
-//            .padding(.bottom, 8)
-//            .onAppear {
-//                sliderVolume = Double(audioManager.currentVolume)  // Конвертируем Float в Double
-//            }
-//            .onChange(of: audioManager.currentVolume) { _, newValue in
-//                sliderVolume = Double(newValue)  // Конвертируем Float в Double
-//            }
-//
-//            Divider()
+            
             OutputAudioDeviceListView()
                 .padding(.top, 20)
                 .padding(.horizontal, 10)
                 .padding(.bottom, 20)
         }
-        .frame(width: 250)  // Adjust width if needed
+        .frame(maxWidth: 250)  // Adjust width if needed
     }
 }
 
