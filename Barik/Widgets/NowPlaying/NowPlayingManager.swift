@@ -380,7 +380,7 @@ final class NowPlayingProvider {
 
 /// Observable manager that periodically updates information about the currently playing song.
 final class NowPlayingManager: ObservableObject {
-    static let shared = NowPlayingManager()
+    static let shared = NowPlayingManager();
 
     @Published private(set) var nowPlaying: NowPlayingSong?
     private var cancellables = Set<AnyCancellable>()
@@ -388,18 +388,24 @@ final class NowPlayingManager: ObservableObject {
     private var localToggled: Bool = false
     private var updateTimer: Timer?
     private let updateInterval: TimeInterval = 0.5
+    private var cleanupTimer: Timer?
+    private var isCleaningUp = false
 
     private init() {
         // Setup notification observers
         setupNotificationObservers()
         updateNowPlaying()
         setupUpdateTimer()
+        cleanupOldArtwork()
+        setupCleanupTimer()
     }
 
     deinit {
         cancellables.removeAll()
         updateTimer?.invalidate()
         updateTimer = nil
+        cleanupTimer?.invalidate()
+        cleanupTimer = nil
     }
     
     // MARK: - Private Methods
@@ -480,6 +486,63 @@ final class NowPlayingManager: ObservableObject {
             .publisher(for: NSNotification.Name(name), object: nil)
             .sink { _ in handler() }
             .store(in: &cancellables)
+    }
+    
+    /// Cleans up old artwork files from temporary directory.
+    private func cleanupOldArtwork() {
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self = self else { return }
+            
+            // Prevent concurrent cleanup operations
+            guard !self.isCleaningUp else { return }
+            self.isCleaningUp = true
+            
+            defer { self.isCleaningUp = false }
+            
+            let temporaryDirectory = FileManager.default.temporaryDirectory
+            let artworkDirectory = temporaryDirectory.appendingPathComponent("NowPlayingArtwork", isDirectory: true)
+            
+            guard FileManager.default.fileExists(atPath: artworkDirectory.path) else { return }
+            
+            do {
+                let fileURLs = try FileManager.default.contentsOfDirectory(
+                    at: artworkDirectory, 
+                    includingPropertiesForKeys: [.contentModificationDateKey]
+                )
+                let oneDayAgo = Date().addingTimeInterval(-24 * 60 * 60)
+                var deletedCount = 0
+                
+                for fileURL in fileURLs {
+                    do {
+                        let resourceValues = try fileURL.resourceValues(forKeys: [.contentModificationDateKey])
+                        if let modificationDate = resourceValues.contentModificationDate,
+                           modificationDate < oneDayAgo {
+                            try FileManager.default.removeItem(at: fileURL)
+                            deletedCount += 1
+                        }
+                    } catch {
+                        print("Failed to check or remove artwork file \(fileURL.lastPathComponent): \(error)")
+                    }
+                }
+                
+                if deletedCount > 0 {
+                    print("Cleaned up \(deletedCount) old artwork files")
+                }
+            } catch {
+                print("Failed to list artwork directory contents: \(error)")
+            }
+        }
+    }
+    
+    /// Sets up periodic cleanup timer to run once per hour.
+    private func setupCleanupTimer() {
+        cleanupTimer?.invalidate()
+        cleanupTimer = Timer.scheduledTimer(
+            withTimeInterval: 3600, // 1 hour
+            repeats: true
+        ) { [weak self] _ in
+            self?.cleanupOldArtwork()
+        }
     }
     
     // MARK: - Public Control Methods
