@@ -51,11 +51,11 @@ struct MenuBarPopupView<Content: View>: View {
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadiusValue, style: .continuous)
-                        .stroke(GlassGradient.gradient, lineWidth: 2)
+                        .stroke(GlassGradient.gradient, lineWidth: 1)
                 )
                 .padding(.top, foregroundHeight + 5)
                 .offset(x: computedOffset, y: computedYOffset)
-                .shadow(radius: 30)
+                .shadow(color: .popupShadow, radius: 30)
                 .blur(radius: blurRadiusValue)
                 .scaleEffect(x: scaleXValue)
                 .scaleEffect(y: scaleYAnimationValue)

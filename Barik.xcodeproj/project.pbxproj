@@ -20,7 +20,26 @@
 		C1BB4B422D526B5C00A1F46E /* Exceptions for "Barik" folder in "Barik" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				CLAUDE.md,
+				Config/CLAUDE.md,
 				Info.plist,
+				MenuBarPopup/CLAUDE.md,
+				Resources/CLAUDE.md,
+				Styles/CLAUDE.md,
+				Utils/CLAUDE.md,
+				Views/CLAUDE.md,
+				Widgets/Battery/CLAUDE.md,
+				Widgets/Bluetooth/CLAUDE.md,
+				Widgets/CLAUDE.md,
+				Widgets/Network/CLAUDE.md,
+				Widgets/NowPlaying/CLAUDE.md,
+				Widgets/OutputAudio/CLAUDE.md,
+				Widgets/Spaces/Aerospace/CLAUDE.md,
+				Widgets/Spaces/CLAUDE.md,
+				Widgets/Spaces/Views/CLAUDE.md,
+				Widgets/Spaces/Yabai/CLAUDE.md,
+				Widgets/SystemBanner/CLAUDE.md,
+				"Widgets/Time+Calendar/CLAUDE.md",
 			);
 			target = C10E2F892D41235900AC957C /* Barik */;
 		};
