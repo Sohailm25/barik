@@ -1,3 +1,7 @@
+**NOTICE**: Unfortunately, I don’t have much free time to actively maintain this project. If you like the project but are not satisfied with its current state, you can explore the many forks or create your own. Even if you’re unfamiliar with **Swift**, tools like **Claude Code** and **Codex** can effectively help implement projects like this. This is a great opportunity to tailor **barik** to your needs and make it exactly the way you’d like.
+
+----
+
 <p align="center" dir="auto">
   <img src="resources/header-image.png" alt="Barik"">
   <p align="center" dir="auto">
