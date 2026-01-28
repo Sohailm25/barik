@@ -4,6 +4,7 @@ struct SpacesWidget: View {
     @StateObject var viewModel = SpacesViewModel()
 
     @ObservedObject var configManager = ConfigManager.shared
+    @ObservedObject var nameService = WorkspaceNameService.shared
     var foregroundHeight: CGFloat { configManager.config.experimental.foreground.resolveHeight() }
 
     var body: some View {
@@ -16,6 +17,7 @@ struct SpacesWidget: View {
         .animation(.smooth(duration: 0.3), value: viewModel.spaces)
         .foregroundStyle(Color.foreground)
         .environmentObject(viewModel)
+        .environmentObject(nameService)
     }
 }
 
@@ -23,6 +25,7 @@ struct SpacesWidget: View {
 private struct SpaceView: View {
     @EnvironmentObject var configProvider: ConfigProvider
     @EnvironmentObject var viewModel: SpacesViewModel
+    @EnvironmentObject var nameService: WorkspaceNameService
 
     var config: ConfigData { configProvider.config }
     var spaceConfig: ConfigData { config["space"]?.dictionaryValue ?? [:] }
@@ -35,16 +38,36 @@ private struct SpaceView: View {
     let space: AnySpace
 
     @State var isHovered = false
+    @State private var isEditing = false
+    @State private var editText = ""
 
     var body: some View {
         let isFocused = space.windows.contains { $0.isFocused } || space.isFocused
         HStack(spacing: 0) {
             Spacer().frame(width: 10)
             if showKey {
-                Text(space.id)
+                if isEditing {
+                    TextField("", text: $editText, onCommit: {
+                        commitEdit()
+                    })
                     .font(.headline)
-                    .frame(minWidth: 15)
+                    .textFieldStyle(.plain)
+                    .frame(minWidth: 30, maxWidth: 80)
                     .fixedSize(horizontal: true, vertical: false)
+                    .onExitCommand {
+                        isEditing = false
+                    }
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            NSApp.windows.first(where: { $0.isVisible && $0.level.rawValue > 0 })?.makeKey()
+                        }
+                    }
+                } else {
+                    Text(nameService.getDisplayName(for: space.id) ?? space.id)
+                        .font(.headline)
+                        .frame(minWidth: 15)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
                 Spacer().frame(width: 5)
             }
             HStack(spacing: 2) {
@@ -67,7 +90,10 @@ private struct SpaceView: View {
         .clipShape(RoundedRectangle(cornerRadius: foregroundHeight < 30 ? 0 : 8, style: .continuous))
         .shadow(color: .shadow, radius: foregroundHeight < 30 ? 0 : 2)
         .transition(.blurReplace)
-        .onTapGesture {
+        .onTapGesture(count: 2) {
+            startEditing()
+        }
+        .onTapGesture(count: 1) {
             viewModel.switchToSpace(space, needWindowFocus: true)
         }
         .animation(.smooth, value: isHovered)
@@ -75,12 +101,28 @@ private struct SpaceView: View {
             isHovered = value
         }
     }
+
+    private func startEditing() {
+        editText = nameService.getDisplayName(for: space.id) ?? space.id
+        isEditing = true
+    }
+
+    private func commitEdit() {
+        let trimmed = editText.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            nameService.removeDisplayName(for: space.id)
+        } else {
+            nameService.setDisplayName(trimmed, for: space.id)
+        }
+        isEditing = false
+    }
 }
 
 /// This view shows a window and its icon.
 private struct WindowView: View {
     @EnvironmentObject var configProvider: ConfigProvider
     @EnvironmentObject var viewModel: SpacesViewModel
+    @EnvironmentObject var nameService: WorkspaceNameService
 
     var config: ConfigData { configProvider.config }
     var windowConfig: ConfigData { config["window"]?.dictionaryValue ?? [:] }
@@ -123,7 +165,8 @@ private struct WindowView: View {
             .opacity(spaceIsFocused && !window.isFocused ? 0.5 : 1)
             .transition(.blurReplace)
 
-            if window.isFocused, !title.isEmpty, showTitle {
+            let hasCustomName = nameService.getDisplayName(for: space.id) != nil
+            if window.isFocused, !title.isEmpty, showTitle, !hasCustomName {
                 HStack {
                     Text(
                         title.count > titleMaxLength

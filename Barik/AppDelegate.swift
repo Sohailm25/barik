@@ -58,7 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        let newPanel = NSPanel(
+        let newPanel = KeyablePanel(
             contentRect: frame,
             styleMask: [.nonactivatingPanel],
             backing: .buffered,
