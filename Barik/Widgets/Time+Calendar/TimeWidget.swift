@@ -15,6 +15,13 @@ struct TimeWidget: View {
     var calendarShowEvents: Bool {
         calendarConfig?["show-events"]?.boolValue ?? true
     }
+    var clickAction: TimeClickAction {
+        if let actionString = config["click-action"]?.stringValue,
+           let action = TimeClickAction(rawValue: actionString) {
+            return action
+        }
+        return .calendar
+    }
 
     @State private var currentTime = Date()
     let calendarManager: CalendarManager
@@ -57,10 +64,15 @@ struct TimeWidget: View {
         .background(.black.opacity(0.001))
         .monospacedDigit()
         .onTapGesture {
-            MenuBarPopup.show(rect: rect, id: "calendar") {
-                CalendarPopup(
-                    calendarManager: calendarManager,
-                    configProvider: configProvider)
+            switch clickAction {
+            case .calendar:
+                MenuBarPopup.show(rect: rect, id: "calendar") {
+                    CalendarPopup(
+                        calendarManager: calendarManager,
+                        configProvider: configProvider)
+                }
+            case .notificationCenter:
+                SystemUIHelper.openNotificationCenter()
             }
         }
     }

@@ -19,24 +19,19 @@ enum WifiSignalStrength: String {
     case unknown = "Unknown"
 }
 
-/// Unified view model for monitoring network and Wi‑Fi status.
 final class NetworkStatusViewModel: NSObject, ObservableObject,
-    CLLocationManagerDelegate
+    CLLocationManagerDelegate, CWEventDelegate
 {
 
-    // States for Wi‑Fi and Ethernet obtained via NWPathMonitor.
     @Published var wifiState: NetworkState = .disconnected
     @Published var ethernetState: NetworkState = .disconnected
 
-    // Wi‑Fi details obtained via CoreWLAN.
     @Published var ssid: String = "Not connected"
     @Published var rssi: Int = 0
     @Published var noise: Int = 0
     @Published var channel: String = "N/A"
 
-    /// Computed property for signal strength.
     var wifiSignalStrength: WifiSignalStrength {
-        // If Wi‑Fi is not connected or the interface is missing – return unknown.
         if ssid == "Not connected" || ssid == "No interface" {
             return .unknown
         }
@@ -52,23 +47,56 @@ final class NetworkStatusViewModel: NSObject, ObservableObject,
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "NetworkMonitor")
 
-    private var timer: Timer?
+    private var rssiTimer: Timer?
     private let locationManager = CLLocationManager()
+    private var wifiClient: CWWiFiClient?
 
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
+
+        setupWiFiEventMonitoring()
         startNetworkMonitoring()
-        startWiFiMonitoring()
+        startRSSIMonitoring()
+        updateWiFiInfo()
+    }
+
+    private func setupWiFiEventMonitoring() {
+        let client = CWWiFiClient.shared()
+        guard client.interface() != nil else { return }
+
+        do {
+            try client.startMonitoringEvent(with: .ssidDidChange)
+            try client.startMonitoringEvent(with: .linkDidChange)
+            client.delegate = self
+            wifiClient = client
+        } catch {
+            print("CWWiFiClient monitoring error: \(error)")
+        }
     }
 
     deinit {
         stopNetworkMonitoring()
-        stopWiFiMonitoring()
+        stopRSSIMonitoring()
+        if let client = wifiClient {
+            try? client.stopMonitoringAllEvents()
+        }
     }
 
-    // MARK: — NWPathMonitor for overall network status.
+    func ssidDidChangeForWiFiInterface(withName interfaceName: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.updateWiFiInfo()
+        }
+    }
+
+    func linkDidChangeForWiFiInterface(withName interfaceName: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.updateWiFiInfo()
+        }
+    }
+
+    // MARK: - NWPathMonitor for overall network status
 
     private func startNetworkMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
@@ -122,19 +150,18 @@ final class NetworkStatusViewModel: NSObject, ObservableObject,
         monitor.cancel()
     }
 
-    // MARK: — Updating Wi‑Fi information via CoreWLAN.
+    // MARK: - RSSI Polling (30s interval for signal strength updates)
 
-    private func startWiFiMonitoring() {
-        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) {
+    private func startRSSIMonitoring() {
+        rssiTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) {
             [weak self] _ in
             self?.updateWiFiInfo()
         }
-        updateWiFiInfo()
     }
 
-    private func stopWiFiMonitoring() {
-        timer?.invalidate()
-        timer = nil
+    private func stopRSSIMonitoring() {
+        rssiTimer?.invalidate()
+        rssiTimer = nil
     }
 
     private func updateWiFiInfo() {

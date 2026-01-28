@@ -7,12 +7,25 @@ struct RootToml: Decodable {
     var aerospace: AerospaceConfig?
     var experimental: ExperimentalConfig?
     var widgets: WidgetsSection
+    var llm: LLMConfig?
+    var messaging: MessagingConfig?
+    var notchDrawer: NotchDrawerConfig?
+
+    enum CodingKeys: String, CodingKey {
+        case theme, yabai, aerospace, experimental, widgets
+        case llm
+        case messaging
+        case notchDrawer = "notch-drawer"
+    }
 
     init() {
         self.theme = nil
         self.yabai = nil
         self.aerospace = nil
         self.widgets = WidgetsSection(displayed: [], others: [:])
+        self.llm = nil
+        self.messaging = nil
+        self.notchDrawer = nil
     }
 }
 
@@ -37,6 +50,18 @@ struct Config {
     
     var experimental: ExperimentalConfig {
         rootToml.experimental ?? ExperimentalConfig()
+    }
+
+    var llm: LLMConfig {
+        rootToml.llm ?? LLMConfig()
+    }
+
+    var messaging: MessagingConfig? {
+        rootToml.messaging
+    }
+
+    var notchDrawer: NotchDrawerConfig {
+        rootToml.notchDrawer ?? NotchDrawerConfig()
     }
 }
 
@@ -444,6 +469,103 @@ enum BackgroundForegroundHeight: Decodable {
                 debugDescription: "Expected 'default', 'menu-bar' or a float value"
             )
         )
+    }
+}
+
+struct LLMConfig: Decodable {
+    let apiKey: String?
+    let model: String
+    let piiConsent: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case apiKey = "api-key"
+        case model
+        case piiConsent = "pii-consent"
+    }
+
+    init() {
+        self.apiKey = nil
+        self.model = "claude-sonnet-4-20250514"
+        self.piiConsent = false
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        apiKey = try container.decodeIfPresent(String.self, forKey: .apiKey)
+        model = try container.decodeIfPresent(String.self, forKey: .model) ?? "claude-sonnet-4-20250514"
+        piiConsent = try container.decodeIfPresent(Bool.self, forKey: .piiConsent) ?? false
+    }
+}
+
+struct MessagingConfig: Decodable {
+    let imessage: IMessageConfig?
+    let gmail: GmailConfig?
+
+    struct IMessageConfig: Decodable {
+        let enabled: Bool
+        let lookbackHours: Int
+
+        enum CodingKeys: String, CodingKey {
+            case enabled
+            case lookbackHours = "lookback-hours"
+        }
+
+        init() {
+            self.enabled = true
+            self.lookbackHours = 24
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+            lookbackHours = try container.decodeIfPresent(Int.self, forKey: .lookbackHours) ?? 24
+        }
+    }
+
+    struct GmailConfig: Decodable {
+        let enabled: Bool
+        let checkIntervalMinutes: Int
+
+        enum CodingKeys: String, CodingKey {
+            case enabled
+            case checkIntervalMinutes = "check-interval-minutes"
+        }
+
+        init() {
+            self.enabled = true
+            self.checkIntervalMinutes = 5
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+            checkIntervalMinutes = try container.decodeIfPresent(Int.self, forKey: .checkIntervalMinutes) ?? 5
+        }
+    }
+}
+
+struct NotchDrawerConfig: Decodable {
+    let width: CGFloat
+    let maxHeight: CGFloat
+    let animationDuration: Double
+
+    enum CodingKeys: String, CodingKey {
+        case width
+        case maxHeight = "max-height"
+        case animationDuration = "animation-duration"
+    }
+
+    init() {
+        self.width = 300
+        self.maxHeight = 450
+        self.animationDuration = 0.3
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        width = try container.decodeIfPresent(CGFloat.self, forKey: .width) ?? 300
+        maxHeight = try container.decodeIfPresent(CGFloat.self, forKey: .maxHeight) ?? 450
+        animationDuration = try container.decodeIfPresent(Double.self, forKey: .animationDuration) ?? 0.3
     }
 }
 

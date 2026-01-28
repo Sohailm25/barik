@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		F66C98C52D60E35600C3C53C /* TOMLDecoder in Frameworks */ = {isa = PBXBuildFile; productRef = F66C98C42D60E35600C3C53C /* TOMLDecoder */; };
 		F6B514042D6C5F3400DFEB43 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = F6B514032D6C5F3400DFEB43 /* MarkdownUI */; };
+		BA0000010000000000000C /* TOMLDecoder in Frameworks */ = {isa = PBXBuildFile; productRef = BA0000010000000000000D /* TOMLDecoder */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		C10E2F8A2D41235900AC957C /* Barik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Barik.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA00000100000000000001 /* BarikTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BarikTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -34,6 +36,11 @@
 			path = Barik;
 			sourceTree = "<group>";
 		};
+		BA00000100000000000006 /* BarikTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BarikTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +53,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BA00000100000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA0000010000000000000C /* TOMLDecoder in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -54,6 +69,7 @@
 			children = (
 				C10E2F8B2D41235900AC957C /* Products */,
 				C1BB4B332D526B5C00A1F46E /* Barik */,
+				BA00000100000000000006 /* BarikTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -61,11 +77,30 @@
 			isa = PBXGroup;
 			children = (
 				C10E2F8A2D41235900AC957C /* Barik.app */,
+				BA00000100000000000001 /* BarikTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXContainerItemProxy section */
+		BA0000010000000000000B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C10E2F822D41235900AC957C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C10E2F892D41235900AC957C;
+			remoteInfo = Barik;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		BA0000010000000000000A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C10E2F892D41235900AC957C /* Barik */;
+			targetProxy = BA0000010000000000000B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXNativeTarget section */
 		C10E2F892D41235900AC957C /* Barik */ = {
@@ -92,6 +127,30 @@
 			productReference = C10E2F8A2D41235900AC957C /* Barik.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BA00000100000000000002 /* BarikTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA00000100000000000009 /* Build configuration list for PBXNativeTarget "BarikTests" */;
+			buildPhases = (
+				BA00000100000000000003 /* Sources */,
+				BA00000100000000000004 /* Frameworks */,
+				BA00000100000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BA0000010000000000000A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BA00000100000000000006 /* BarikTests */,
+			);
+			name = BarikTests;
+			packageProductDependencies = (
+				BA0000010000000000000D /* TOMLDecoder */,
+			);
+			productName = BarikTests;
+			productReference = BA00000100000000000001 /* BarikTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -104,6 +163,10 @@
 				TargetAttributes = {
 					C10E2F892D41235900AC957C = {
 						CreatedOnToolsVersion = 16.2;
+					};
+					BA00000100000000000002 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = C10E2F892D41235900AC957C;
 					};
 				};
 			};
@@ -144,6 +207,7 @@
 			projectRoot = "";
 			targets = (
 				C10E2F892D41235900AC957C /* Barik */,
+				BA00000100000000000002 /* BarikTests */,
 			);
 		};
 /* End PBXProject section */
@@ -156,10 +220,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BA00000100000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C10E2F862D41235900AC957C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA00000100000000000003 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -357,6 +435,40 @@
 			};
 			name = Release;
 		};
+		BA00000100000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Pansy.BarikTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Barik.app/Contents/MacOS/Barik";
+			};
+			name = Debug;
+		};
+		BA00000100000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Pansy.BarikTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Barik.app/Contents/MacOS/Barik";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -374,6 +486,15 @@
 			buildConfigurations = (
 				C10E2FB02D41235B00AC957C /* Debug */,
 				C10E2FB12D41235B00AC957C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BA00000100000000000009 /* Build configuration list for PBXNativeTarget "BarikTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA00000100000000000007 /* Debug */,
+				BA00000100000000000008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -409,6 +530,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F6B514022D6C5F3400DFEB43 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		BA0000010000000000000D /* TOMLDecoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F66C98C32D60E35600C3C53C /* XCRemoteSwiftPackageReference "TOMLDecoder" */;
+			productName = TOMLDecoder;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

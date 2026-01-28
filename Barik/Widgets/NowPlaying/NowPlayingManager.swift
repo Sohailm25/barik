@@ -189,43 +189,106 @@ final class NowPlayingProvider {
 
 // MARK: - Now Playing Manager
 
-/// An observable manager that periodically updates the now playing song.
 final class NowPlayingManager: ObservableObject {
     static let shared = NowPlayingManager()
 
     @Published private(set) var nowPlaying: NowPlayingSong?
-    private var cancellable: AnyCancellable?
+    private var positionTimer: Timer?
+    private var spotifyObserver: NSObjectProtocol?
+    private var musicObserver: NSObjectProtocol?
 
     private init() {
-        cancellable = Timer.publish(every: 0.3, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.updateNowPlaying()
-            }
+        DispatchQueue.main.async { [weak self] in
+            self?.setupDistributedNotificationObservers()
+            self?.fetchNowPlayingAsync()
+        }
     }
 
-    /// Updates the now playing song asynchronously.
-    private func updateNowPlaying() {
-        DispatchQueue.global(qos: .background).async {
+    deinit {
+        stopObserving()
+    }
+
+    private func setupDistributedNotificationObservers() {
+        let center = DistributedNotificationCenter.default()
+
+        spotifyObserver = center.addObserver(
+            forName: NSNotification.Name("com.spotify.client.PlaybackStateChanged"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.fetchNowPlayingAsync()
+        }
+
+        musicObserver = center.addObserver(
+            forName: NSNotification.Name("com.apple.Music.playerInfo"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.fetchNowPlayingAsync()
+        }
+    }
+
+    private func stopObserving() {
+        let center = DistributedNotificationCenter.default()
+        if let observer = spotifyObserver {
+            center.removeObserver(observer)
+        }
+        if let observer = musicObserver {
+            center.removeObserver(observer)
+        }
+        positionTimer?.invalidate()
+        positionTimer = nil
+    }
+
+    private func fetchNowPlayingAsync() {
+        DispatchQueue.global(qos: .background).async { [weak self] in
             let song = NowPlayingProvider.fetchNowPlaying()
-            DispatchQueue.main.async { [weak self] in
-                self?.nowPlaying = song
+            DispatchQueue.main.async {
+                self?.updateState(with: song)
             }
         }
     }
 
-    /// Skips to the previous track.
+    private func updateState(with song: NowPlayingSong?) {
+        let wasPlaying = nowPlaying?.state == .playing
+        let isPlaying = song?.state == .playing
+
+        nowPlaying = song
+
+        if isPlaying && !wasPlaying {
+            startPositionTimer()
+        } else if !isPlaying && wasPlaying {
+            stopPositionTimer()
+        }
+    }
+
+    private func startPositionTimer() {
+        guard positionTimer == nil else { return }
+        positionTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.fetchNowPlayingAsync()
+        }
+    }
+
+    private func stopPositionTimer() {
+        positionTimer?.invalidate()
+        positionTimer = nil
+    }
+
     func previousTrack() {
-        NowPlayingProvider.executeCommand { $0.previousTrackCommand }
+        DispatchQueue.global(qos: .userInitiated).async {
+            NowPlayingProvider.executeCommand { $0.previousTrackCommand }
+        }
     }
 
-    /// Toggles between play and pause.
     func togglePlayPause() {
-        NowPlayingProvider.executeCommand { $0.togglePlayPauseCommand }
+        DispatchQueue.global(qos: .userInitiated).async {
+            NowPlayingProvider.executeCommand { $0.togglePlayPauseCommand }
+        }
     }
 
-    /// Skips to the next track.
     func nextTrack() {
-        NowPlayingProvider.executeCommand { $0.nextTrackCommand }
+        DispatchQueue.global(qos: .userInitiated).async {
+            NowPlayingProvider.executeCommand { $0.nextTrackCommand }
+        }
     }
 }

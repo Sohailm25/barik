@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 
 protocol SpaceModel: Identifiable, Equatable, Codable {
     associatedtype WindowType: WindowModel
@@ -24,6 +25,20 @@ protocol SwitchableSpacesProvider: SpacesProvider {
     func focusWindow(windowId: String)
 }
 
+enum SpaceEvent {
+    case initialState([AnySpace])
+    case focusChanged(String)
+    case windowsUpdated(String, [AnyWindow])
+    case spaceCreated(String)
+    case spaceDestroyed(String)
+}
+
+protocol EventBasedSpacesProvider {
+    var spacesPublisher: AnyPublisher<SpaceEvent, Never> { get }
+    func startObserving()
+    func stopObserving()
+}
+
 struct AnyWindow: Identifiable, Equatable {
     let id: Int
     let title: String
@@ -37,6 +52,14 @@ struct AnyWindow: Identifiable, Equatable {
         self.appName = window.appName
         self.isFocused = window.isFocused
         self.appIcon = window.appIcon
+    }
+
+    init(id: Int, title: String, appName: String?, isFocused: Bool, appIcon: NSImage?) {
+        self.id = id
+        self.title = title
+        self.appName = appName
+        self.isFocused = isFocused
+        self.appIcon = appIcon
     }
 
     static func == (lhs: AnyWindow, rhs: AnyWindow) -> Bool {
@@ -60,6 +83,12 @@ struct AnySpace: Identifiable, Equatable {
         }
         self.isFocused = space.isFocused
         self.windows = space.windows.map { AnyWindow($0) }
+    }
+
+    init(id: String, isFocused: Bool, windows: [AnyWindow]) {
+        self.id = id
+        self.isFocused = isFocused
+        self.windows = windows
     }
 
     static func == (lhs: AnySpace, rhs: AnySpace) -> Bool {

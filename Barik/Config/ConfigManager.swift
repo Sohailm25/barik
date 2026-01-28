@@ -102,6 +102,27 @@ final class ConfigManager: ObservableObject {
             
             [background]
             enabled = true
+
+            # === LLM Configuration (Anthropic Claude) ===
+            # [llm]
+            # api-key = "sk-ant-..."       # Anthropic API key
+            # model = "claude-sonnet-4-20250514" # Model to use
+            # pii-consent = false          # Consent to send messages to LLM
+
+            # === Messaging Integrations ===
+            # [messaging.imessage]
+            # enabled = true               # Enable iMessage reading (requires Full Disk Access)
+            # lookback-hours = 24          # How far back to fetch messages
+
+            # [messaging.gmail]
+            # enabled = true               # Enable Gmail reading (requires OAuth setup)
+            # check-interval-minutes = 5   # How often to check for new emails
+
+            # === Notch Drawer ===
+            # [notch-drawer]
+            # width = 300                  # Drawer width in pixels
+            # max-height = 450             # Max drawer height
+            # animation-duration = 0.3     # Slide animation duration in seconds
             """
         try defaultTOML.write(toFile: path, atomically: true, encoding: .utf8)
     }
