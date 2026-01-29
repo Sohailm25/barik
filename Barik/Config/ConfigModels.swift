@@ -10,12 +10,14 @@ struct RootToml: Decodable {
     var llm: LLMConfig?
     var messaging: MessagingConfig?
     var notchDrawer: NotchDrawerConfig?
+    var ghosty: GhostyConfig?
 
     enum CodingKeys: String, CodingKey {
         case theme, yabai, aerospace, experimental, widgets
         case llm
         case messaging
         case notchDrawer = "notch-drawer"
+        case ghosty
     }
 
     init() {
@@ -26,6 +28,7 @@ struct RootToml: Decodable {
         self.llm = nil
         self.messaging = nil
         self.notchDrawer = nil
+        self.ghosty = nil
     }
 }
 
@@ -62,6 +65,10 @@ struct Config {
 
     var notchDrawer: NotchDrawerConfig {
         rootToml.notchDrawer ?? NotchDrawerConfig()
+    }
+
+    var ghosty: GhostyConfig {
+        rootToml.ghosty ?? GhostyConfig()
     }
 }
 
@@ -569,3 +576,92 @@ struct NotchDrawerConfig: Decodable {
     }
 }
 
+struct GhostyConfig: Decodable {
+    let enabled: Bool
+    let shortcut: String
+    let tunnel: TunnelConfig
+    let gateway: GatewayConfig
+
+    init() {
+        self.enabled = true
+        self.shortcut = "ctrl+space"
+        self.tunnel = TunnelConfig()
+        self.gateway = GatewayConfig()
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case enabled, shortcut, tunnel, gateway
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        shortcut = try container.decodeIfPresent(String.self, forKey: .shortcut) ?? "ctrl+space"
+        tunnel = try container.decodeIfPresent(TunnelConfig.self, forKey: .tunnel) ?? TunnelConfig()
+        gateway = try container.decodeIfPresent(GatewayConfig.self, forKey: .gateway) ?? GatewayConfig()
+    }
+
+    struct TunnelConfig: Decodable {
+        let host: String
+        let user: String
+        let port: Int
+        let remotePort: Int
+        let localPort: Int
+
+        enum CodingKeys: String, CodingKey {
+            case host, user, port
+            case remotePort = "remote-port"
+            case localPort = "local-port"
+        }
+
+        init() {
+            self.host = "100.97.157.103"
+            self.user = "sohailmohammad"
+            self.port = 22
+            self.remotePort = 18789
+            self.localPort = 18789
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            host = try container.decodeIfPresent(String.self, forKey: .host) ?? "100.97.157.103"
+            user = try container.decodeIfPresent(String.self, forKey: .user) ?? "sohailmohammad"
+            port = try container.decodeIfPresent(Int.self, forKey: .port) ?? 22
+            remotePort = try container.decodeIfPresent(Int.self, forKey: .remotePort) ?? 18789
+            localPort = try container.decodeIfPresent(Int.self, forKey: .localPort) ?? 18789
+        }
+    }
+
+    struct GatewayConfig: Decodable {
+        let healthCheckInterval: TimeInterval
+        let reconnectMaxAttempts: Int
+        let reconnectBaseDelay: TimeInterval
+        let reconnectMaxDelay: TimeInterval
+        let password: String?
+
+        enum CodingKeys: String, CodingKey {
+            case healthCheckInterval = "health-check-interval"
+            case reconnectMaxAttempts = "reconnect-max-attempts"
+            case reconnectBaseDelay = "reconnect-base-delay"
+            case reconnectMaxDelay = "reconnect-max-delay"
+            case password
+        }
+
+        init() {
+            self.healthCheckInterval = 15
+            self.reconnectMaxAttempts = 10
+            self.reconnectBaseDelay = 1.0
+            self.reconnectMaxDelay = 30.0
+            self.password = nil
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            healthCheckInterval = try container.decodeIfPresent(TimeInterval.self, forKey: .healthCheckInterval) ?? 15
+            reconnectMaxAttempts = try container.decodeIfPresent(Int.self, forKey: .reconnectMaxAttempts) ?? 10
+            reconnectBaseDelay = try container.decodeIfPresent(TimeInterval.self, forKey: .reconnectBaseDelay) ?? 1.0
+            reconnectMaxDelay = try container.decodeIfPresent(TimeInterval.self, forKey: .reconnectMaxDelay) ?? 30.0
+            password = try container.decodeIfPresent(String.self, forKey: .password)
+        }
+    }
+}

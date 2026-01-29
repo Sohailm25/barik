@@ -19,6 +19,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         
+        HotKeyManager.shared.setup()
+        GhostyManager.shared.startConnection()
+
         MenuBarPopup.setup()
         setupPanels()
 

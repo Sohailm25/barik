@@ -75,6 +75,7 @@ final class ConfigManager: ObservableObject {
                 "default.network",
                 "default.battery",
                 "divider",
+                "default.ghosty",
                 # { "default.time" = { time-zone = "America/Los_Angeles", format = "E d, hh:mm" } },
                 "default.time"
             ]
@@ -123,6 +124,24 @@ final class ConfigManager: ObservableObject {
             # width = 300                  # Drawer width in pixels
             # max-height = 450             # Max drawer height
             # animation-duration = 0.3     # Slide animation duration in seconds
+
+            # === Ghosty Assistant ===
+            [ghosty]
+            enabled = true
+            shortcut = "ctrl+space"
+
+            [ghosty.tunnel]
+            host = "100.97.157.103"
+            user = "sohailmohammad"
+            port = 22
+            remote-port = 18789
+            local-port = 18789
+
+            [ghosty.gateway]
+            health-check-interval = 15
+            reconnect-max-attempts = 10
+            reconnect-base-delay = 1.0
+            reconnect-max-delay = 30.0
             """
         try defaultTOML.write(toFile: path, atomically: true, encoding: .utf8)
     }
